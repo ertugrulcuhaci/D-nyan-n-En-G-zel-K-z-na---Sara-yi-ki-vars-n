@@ -4,118 +4,256 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anı Eşleştirme 🧩</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;0,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --blue-deep: #1B3A66;
-        --blue-primary: #2C6FBD;
-        --blue-light: #8ECDF0;
-        --blue-pale-bg-1: #EAF4FC;
-        --blue-pale-bg-2: #CFE8FB;
+        --ink:#0A1628; --deep:#112240;
+        --azure:#2D6FBD; --sky:#6BB8E8; --mist:#C8E8F8; --parchment:#EBF5FD;
+        --ember:#FF6B8A; --honey:#F5C957;
+        --frost:rgba(255,255,255,.06); --rim:rgba(255,255,255,.12);
     }
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(160deg, var(--blue-pale-bg-1) 0%, var(--blue-pale-bg-2) 100%);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+        font-family:'Poppins',sans-serif; background:var(--ink); color:var(--parchment);
+        min-height:100vh; display:flex; flex-direction:column;
+        align-items:center; justify-content:flex-start;
+        padding:32px 16px 56px; overflow-x:hidden; position:relative;
     }
-    h2 { color: var(--blue-deep); margin-bottom: 10px; }
+    canvas#cv { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+    .page-head { position:relative; z-index:1; text-align:center; margin-bottom:24px; }
+    .eyebrow { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:rgba(107,184,232,.4); margin-bottom:8px; }
+    h2 {
+        font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7vw,44px);
+        font-style:italic; font-weight:600;
+        background:linear-gradient(135deg,var(--honey),var(--sky));
+        -webkit-background-clip:text; background-clip:text; color:transparent;
+        margin-bottom:6px;
+    }
+    .sub { font-size:12px; font-weight:300; color:rgba(200,232,248,.45); }
+
+    /* Bilgi çubuğu */
+    .info-bar {
+        position:relative; z-index:1; display:flex; gap:16px;
+        margin-bottom:20px; flex-wrap:wrap; justify-content:center;
+    }
+    .info-pill {
+        padding:7px 18px; border-radius:20px;
+        background:var(--frost); border:1px solid var(--rim);
+        font-size:12px; font-weight:600; color:rgba(200,232,248,.75);
+    }
+    .info-pill span { color:var(--sky); }
+
+    /* Grid */
     .grid {
-        display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; margin-bottom: 20px;
+        position:relative; z-index:1;
+        display:grid; gap:10px;
+        grid-template-columns:repeat(4,1fr);
+        max-width:460px; width:100%;
+        margin-bottom:24px;
     }
-    @media (min-width: 500px) { .grid { grid-template-columns: repeat(4, 100px); gap: 15px; } }
+    @media (min-width:480px){ .grid { gap:13px; } }
 
+    /* Kart */
     .card {
-        width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
-        border-radius: 10px; cursor: pointer; position: relative; transform-style: preserve-3d;
-        transition: transform 0.5s; box-shadow: 0 5px 15px rgba(44,111,189,0.2);
+        aspect-ratio:1; border-radius:14px; cursor:pointer;
+        position:relative; transform-style:preserve-3d;
+        transition:transform .55s cubic-bezier(.175,.885,.32,1.275);
+        box-shadow:0 6px 20px rgba(0,0,0,.35);
+        user-select:none; -webkit-user-select:none;
     }
-    .card.flip { transform: rotateY(180deg); cursor: default; }
-    .card.matched { box-shadow: 0 0 22px rgba(44,111,189,0.6); }
+    .card.flipped { transform:rotateY(180deg); }
+    .card.matched  { box-shadow:0 0 20px rgba(107,184,232,.5); cursor:default; }
 
-    .front, .back {
-        position: absolute; width: 100%; height: 100%; border-radius: 10px;
-        backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
+    .face, .back {
+        position:absolute; inset:0; border-radius:14px;
+        backface-visibility:hidden; display:flex; align-items:center; justify-content:center;
     }
-    .front { color: white; font-size: 28px; }
+    .face {
+        background:linear-gradient(135deg,var(--azure),var(--sky));
+        font-size:clamp(22px,5vw,32px);
+        color:rgba(255,255,255,.9);
+    }
     .back {
-        background: white; transform: rotateY(180deg);
-        background-size: cover; background-position: center;
-        border: 2px solid var(--blue-light);
+        background:#fff; transform:rotateY(180deg);
+        border:2px solid rgba(107,184,232,.4);
+        overflow:hidden;
     }
+    .back img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+
+    /* Kazandı ekranı */
+    #win {
+        display:none; position:fixed; inset:0; z-index:40;
+        background:rgba(10,22,40,.88); backdrop-filter:blur(10px);
+        flex-direction:column; align-items:center; justify-content:center;
+        animation:fadeIn .5s ease;
+    }
+    #win.show { display:flex; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .win-box {
+        background:var(--frost); border:1px solid var(--rim);
+        border-radius:26px; padding:44px 36px; text-align:center; max-width:340px;
+        backdrop-filter:blur(22px); box-shadow:0 30px 70px rgba(0,0,0,.55);
+        animation:riseUp .6s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes riseUp { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .win-icon { font-size:60px; margin-bottom:16px; }
+    .win-title {
+        font-family:'Cormorant Garamond',serif; font-size:28px; font-style:italic;
+        color:var(--mist); margin-bottom:10px;
+    }
+    .win-sub { font-size:13px; color:rgba(200,232,248,.6); margin-bottom:22px; }
 
     .btn {
-        padding: 10px 20px; background: var(--blue-primary); color: white; border: none; border-radius: 20px;
-        cursor: pointer; font-family: 'Poppins', sans-serif; text-decoration: none; transition: 0.3s;
+        display:inline-block; padding:12px 28px; border:none; border-radius:30px;
+        font-family:'Poppins',sans-serif; font-size:13px; font-weight:600;
+        cursor:pointer; color:#fff; margin:0 5px;
+        background:linear-gradient(135deg,var(--azure),var(--sky));
+        box-shadow:0 8px 22px rgba(45,111,189,.4); transition:.2s;
     }
-    .btn:hover { background: var(--blue-deep); }
+    .btn:hover { transform:scale(1.05); }
+    .btn.ghost { background:transparent; border:1.5px solid rgba(107,184,232,.4); color:var(--sky); box-shadow:none; }
+    .btn.ghost:hover { background:var(--sky); color:var(--ink); }
+
+    .btn-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+    @media (prefers-reduced-motion:reduce) { .card { transition:none; } }
 </style>
 </head>
 <body>
-    <h2>Anılarımızı Eşleştir 💙</h2>
-    <div class="grid" id="grid"></div>
-    <a href="oyun.html" class="btn">Menüye Dön</a>
+<canvas id="cv"></canvas>
+
+<div class="page-head">
+    <p class="eyebrow">Hafıza oyunu</p>
+    <h2>Anılarımızı Eşleştir</h2>
+    <p class="sub">Tüm çiftleri bul 💙</p>
+</div>
+
+<div class="info-bar">
+    <div class="info-pill">Hamle: <span id="moves">0</span></div>
+    <div class="info-pill">Eşleşen: <span id="matched">0</span> / 6</div>
+    <div class="info-pill">Süre: <span id="timer">0:00</span></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="btn-row" style="position:relative;z-index:1;">
+    <button class="btn ghost" onclick="restart()">🔄 Yeniden</button>
+    <button class="btn ghost" onclick="location.href='oyun.html'">← Menü</button>
+</div>
+
+<!-- Kazandı popup -->
+<div id="win">
+    <div class="win-box">
+        <div class="win-icon">💙</div>
+        <h3 class="win-title">Tüm Anılar Eşleşti!</h3>
+        <p class="win-sub">Tıpkı kalplerimiz gibi.<br>Seni çok seviyorum Sara! ❤️<br><br><span id="win-stats"></span></p>
+        <div class="btn-row">
+            <button class="btn" onclick="restart()">🔄 Tekrar Oyna</button>
+            <button class="btn ghost" onclick="location.href='oyun.html'">← Menü</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const grid = document.getElementById('grid');
-    let cards = [];
-    let firstCard, secondCard;
-    let lockBoard = false;
-    let matches = 0;
-    // 6 fotoğrafı 2'şer kez ekliyoruz
-    const images = ['hafiza1.jpg', 'hafiza2.jpg', 'hafiza3.jpg', 'hafiza4.jpg', 'hafiza5.jpg', 'hafiza6.jpg'];
-    const deck = [...images, ...images].sort(() => 0.5 - Math.random());
-    deck.forEach(img => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.img = img;
+/* Canvas stars */
+(function(){
+    const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+    let W,H,st=[];
+    const resize=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;};
+    const mk=()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.3,a:Math.random(),da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1)});
+    function draw(){ctx.clearRect(0,0,W,H);st.forEach(s=>{s.a=Math.max(.04,Math.min(.88,s.a+s.da));if(s.a<=.04||s.a>=.88)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();});requestAnimationFrame(draw);}
+    addEventListener('resize',()=>{resize();st=Array.from({length:75},mk);});
+    resize();st=Array.from({length:75},mk);draw();
+})();
 
-        card.innerHTML = `
-            <div class="front">❤️</div>
-            <div class="back" style="background-image: url('${img}')"></div>
-        `;
+/* Oyun */
+const IMAGES=['hafiza1.jpg','hafiza2.jpg','hafiza3.jpg','hafiza4.jpg','hafiza5.jpg','hafiza6.jpg'];
+let first=null, second=null, lock=false, matchCount=0, moveCount=0, timerID=null, seconds=0;
 
-        card.addEventListener('click', flipCard);
-        grid.appendChild(card);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; }
+
+function fmt(s){ return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+
+function startTimer(){
+    clearInterval(timerID);
+    seconds=0; document.getElementById('timer').textContent=fmt(0);
+    timerID=setInterval(()=>{ seconds++; document.getElementById('timer').textContent=fmt(seconds); },1000);
+}
+
+function restart(){
+    document.getElementById('win').classList.remove('show');
+    first=null; second=null; lock=false; matchCount=0; moveCount=0;
+    document.getElementById('moves').textContent=0;
+    document.getElementById('matched').textContent=0;
+    build();
+    startTimer();
+}
+
+function build(){
+    const grid=document.getElementById('grid');
+    grid.innerHTML='';
+    const deck=shuffle([...IMAGES,...IMAGES]);
+    deck.forEach(img=>{
+        const c=document.createElement('div');
+        c.className='card';
+        c.dataset.img=img;
+        c.innerHTML=`<div class="face">❤️</div><div class="back"><img src="${img}" loading="lazy" alt="anı"></div>`;
+        c.addEventListener('click',flip);
+        grid.appendChild(c);
     });
-    function flipCard() {
-        if (lockBoard || this === firstCard) return;
-        this.classList.add('flip');
-        if (!firstCard) {
-            firstCard = this;
-            return;
-        }
-        secondCard = this;
-        checkForMatch();
+}
+
+function flip(){
+    if(lock||this===first||this.classList.contains('matched'))return;
+    this.classList.add('flipped');
+    if(!first){ first=this; return; }
+    second=this; lock=true;
+    moveCount++;
+    document.getElementById('moves').textContent=moveCount;
+    if(first.dataset.img===second.dataset.img){ match(); }
+    else { unmatch(); }
+}
+
+function match(){
+    first.classList.add('matched'); first.removeEventListener('click',flip);
+    second.classList.add('matched'); second.removeEventListener('click',flip);
+    matchCount++;
+    document.getElementById('matched').textContent=matchCount;
+    reset();
+    if(matchCount===6){ clearInterval(timerID); setTimeout(win,500); }
+}
+
+function unmatch(){
+    const a=first, b=second;
+    setTimeout(()=>{ a.classList.remove('flipped'); b.classList.remove('flipped'); reset(); },1050);
+}
+
+function reset(){ first=null; second=null; lock=false; }
+
+function win(){
+    document.getElementById('win-stats').textContent=`${moveCount} hamle · ${fmt(seconds)}`;
+    document.getElementById('win').classList.add('show');
+    rain(['💙','❤️','✨','⭐','💫'],60);
+}
+
+function rain(s,n){
+    for(let i=0;i<n;i++){
+        const el=document.createElement('div');
+        el.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-30px;font-size:${Math.random()*14+10}px;z-index:50;pointer-events:none;animation:fall ${(Math.random()*3+2).toFixed(2)}s linear ${(Math.random()*2).toFixed(2)}s forwards;`;
+        el.textContent=s[Math.floor(Math.random()*s.length)];
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),7000);
     }
-    function checkForMatch() {
-        if (firstCard.dataset.img === secondCard.dataset.img) {
-            disableCards();
-            matches++;
-            if(matches === 6) {
-                setTimeout(() => alert("Tüm anılarımız eşleşti! Tıpkı kalplerimiz gibi... Seni çok seviyorum Sara! ❤️"), 500);
-            }
-        } else {
-            unflipCards();
-        }
+    if(!document.querySelector('#fall-style')){
+        const st=document.createElement('style');
+        st.id='fall-style';
+        st.textContent='@keyframes fall{to{transform:translateY(110vh);opacity:0}}';
+        document.head.appendChild(st);
     }
-    function disableCards() {
-        firstCard.classList.add('matched');
-        secondCard.classList.add('matched');
-        firstCard.removeEventListener('click', flipCard);
-        secondCard.removeEventListener('click', flipCard);
-        resetBoard();
-    }
-    function unflipCards() {
-        lockBoard = true;
-        setTimeout(() => {
-            firstCard.classList.remove('flip');
-            secondCard.classList.remove('flip');
-            resetBoard();
-        }, 1000);
-    }
-    function resetBoard() {
-        [firstCard, secondCard, lockBoard] = [null, null, false];
-    }
+}
+
+restart();
 </script>
 </body>
 </html>
