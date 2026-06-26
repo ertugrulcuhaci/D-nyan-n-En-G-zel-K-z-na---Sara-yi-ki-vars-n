@@ -1,29 +1,133 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <style>
-        body { background: #0f2027; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; overflow: hidden; }
-        .box { text-align: center; }
-        .btn-yes { padding: 15px 40px; background: #81d4fa; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-no { padding: 15px 40px; background: transparent; border: 1px solid white; color: white; border-radius: 30px; cursor: pointer; position: absolute; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beni Seviyor musun?</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --blue-deep: #1B3A66;
+        --blue-light: #8ECDF0;
+        --gold: #F4C95D;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; height: 100vh; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; font-family: 'Poppins', sans-serif;
+        background: linear-gradient(160deg, #EAF4FC 0%, #BFE3FB 100%);
+        overflow: hidden; position: relative; transition: background 1.4s ease;
+    }
+    body.dawn {
+        background: linear-gradient(160deg, #9FCBEF 0%, #F7C9DA 65%, #FCE7C8 100%);
+    }
+
+    h1 {
+        font-size: 36px; color: var(--blue-deep); margin-bottom: 40px; text-align: center;
+        z-index: 10; padding: 0 20px;
+    }
+
+    .btn-container {
+        display: flex; gap: 30px; position: relative; width: 100%; justify-content: center;
+        height: 100px;
+    }
+
+    button {
+        padding: 15px 40px; font-size: 22px; font-weight: 600; font-family: 'Poppins', sans-serif;
+        border: none; border-radius: 50px; cursor: pointer; color: white;
+        transition: transform 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        z-index: 10;
+    }
+
+    .btn-yes { background: linear-gradient(45deg, #2FB57A, #58D6A0); }
+    .btn-yes:hover { transform: scale(1.1); box-shadow: 0 10px 25px rgba(47, 181, 122, 0.4); }
+
+    .btn-no { background: linear-gradient(45deg, #E25C53, #F2867E); position: absolute; }
+
+    /* "Evet"e basınca çıkacak gizli kutlama mesajı */
+    #happyMessage {
+        display: none; font-size: 32px; color: var(--blue-deep);
+        font-weight: 600; text-align: center; position: absolute;
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: rgba(255,255,255,0.88); padding: 40px; border-radius: 20px;
+        border: 2px solid var(--blue-light);
+        box-shadow: 0 20px 40px rgba(27,58,102,0.25); z-index: 20;
+        max-width: 90%;
+    }
+    #happyMessage button { margin-top: 20px; font-size: 16px; background: var(--blue-deep); }
+</style>
 </head>
 <body>
-    <div class="box" id="main">
-        <h1>Benimle bir ömür geçirmeye var mısın?</h1>
-        <button class="btn-yes" onclick="showLove()">Evet! ❤️</button>
-        <button class="btn-no" id="noBtn" onmouseover="moveNo()">Hayır</button>
+
+    <h1 id="question">Beni Seviyor musun? 🥺</h1>
+
+    <div class="btn-container" id="buttonArea">
+        <!-- Evet Butonu -->
+        <button class="btn-yes" onclick="saidYes()">Evet ❤️</button>
+        <!-- Hayır Butonu (Kaçan Buton) -->
+        <button class="btn-no" id="noBtn">Hayır 💔</button>
     </div>
 
-    <script>
-        function moveNo() {
-            const btn = document.getElementById('noBtn');
-            btn.style.left = Math.random() * 80 + '%';
-            btn.style.top = Math.random() * 80 + '%';
+    <div id="happyMessage">
+        Ben de seni çok seviyorum! 😍💙<br>
+        <button onclick="window.location.href='./index.html'">Ana Sayfaya Dön</button>
+    </div>
+
+<script>
+    const noBtn = document.getElementById("noBtn");
+    const container = document.getElementById("buttonArea");
+
+    // Sayfa yüklendiğinde "Hayır" butonunu başlangıçta "Evet"in yanına hizalama
+    window.onload = () => {
+        noBtn.style.left = "calc(50% + 20px)"; // Evet butonunun biraz sağına
+    };
+
+    // Fare butona yaklaştığında buton kaçar (Masaüstü için)
+    noBtn.addEventListener("mouseover", moveButton);
+
+    // Telefondaki dokunmaları engellemek için (Mobil için)
+    noBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        moveButton();
+    });
+
+    function moveButton() {
+        // Ekranın genişliği ve yüksekliğinden butonun boyutlarını çıkararak sınırları belirliyoruz
+        const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+        const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+
+        // Butonu "absolute" (serbest) duruma getirip rastgele yere ışınlıyoruz
+        noBtn.style.position = "fixed";
+        noBtn.style.left = `${x}px`;
+        noBtn.style.top = `${y}px`;
+    }
+
+    // "Evet" butonuna basıldığında olacaklar
+    function saidYes() {
+        document.body.classList.add("dawn");
+        document.getElementById("question").style.display = "none";
+        document.getElementById("buttonArea").style.display = "none";
+        document.getElementById("happyMessage").style.display = "block";
+
+        // Ekrana kalp/yıldız yağdırma efekti (mavi temaya uygun karışım)
+        const symbols = ['❤️', '💙', '⭐'];
+        for(let i = 0; i < 50; i++) {
+            let heart = document.createElement('div');
+            heart.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+            heart.style.position = 'absolute';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = Math.random() * 100 + 'vh';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+            document.body.appendChild(heart);
         }
-        function showLove() {
-            document.getElementById('main').innerHTML = "<h1>Biliyordum! Seni seviyorum Sara! 💙</h1>";
-        }
-    </script>
+    }
+
+    // Kalp yağmuru animasyonu için CSS'e dinamik kural ekleme
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes fall { to { transform: translateY(100vh); opacity: 0; } }`;
+    document.head.appendChild(style);
+</script>
+
 </body>
 </html>
