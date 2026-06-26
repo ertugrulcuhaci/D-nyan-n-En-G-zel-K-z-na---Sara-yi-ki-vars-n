@@ -4,165 +4,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turluk Masalı 📖</title>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --night-deep: #0B1D3A;
-        --night-mid: #142D52;
-        --blue-primary: #2C6FBD;
-        --blue-light: #8ECDF0;
-        --blue-pale: #EAF4FC;
-        --gold: #F4C95D;
-        --glass: rgba(255,255,255,0.07);
-        --glass-border: rgba(255,255,255,0.16);
+        --ink:#0A1628; --deep:#112240;
+        --azure:#2D6FBD; --sky:#6BB8E8; --mist:#C8E8F8; --parchment:#EBF5FD;
+        --ember:#FF6B8A; --honey:#F5C957;
+        --frost:rgba(255,255,255,.06); --rim:rgba(255,255,255,.12);
     }
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     body {
-        margin: 0; font-family: 'Poppins', sans-serif;
-        background: linear-gradient(160deg, var(--night-deep) 0%, var(--night-mid) 100%);
-        color: var(--blue-pale);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
-        text-align: center; overflow: hidden; position: relative;
+        font-family:'Poppins',sans-serif; background:var(--ink); color:var(--parchment);
+        min-height:100vh; display:flex; flex-direction:column;
+        align-items:center; justify-content:center;
+        padding:24px 16px 48px; overflow-x:hidden; position:relative;
+    }
+    canvas#cv { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+    .card {
+        position:relative; z-index:1; width:100%; max-width:600px;
+        background:var(--frost); border:1px solid var(--rim);
+        border-radius:24px; overflow:hidden;
+        backdrop-filter:blur(22px);
+        box-shadow:0 30px 70px rgba(0,0,0,.55);
+        animation:riseUp .9s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes riseUp { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    /* Resim alanı */
+    .img-wrap {
+        position:relative; width:100%; height:clamp(200px,38vw,300px);
+        overflow:hidden; background:var(--deep);
+    }
+    .img-wrap img {
+        width:100%; height:100%; object-fit:cover;
+        transition:opacity .35s ease;
+    }
+    .img-overlay {
+        position:absolute; inset:0;
+        background:linear-gradient(to bottom, transparent 55%, rgba(10,22,40,.85) 100%);
+    }
+    /* Bölüm numarası — resim üstünde */
+    .chapter-badge {
+        position:absolute; bottom:14px; left:18px;
+        font-size:10px; letter-spacing:3px; text-transform:uppercase;
+        color:rgba(200,232,248,.65);
     }
 
-    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-    .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.2; animation: twinkle 3s ease-in-out infinite; }
-    @keyframes twinkle { 0%, 100% { opacity: .12; } 50% { opacity: .85; } }
-
-    .story-container {
-        width: 90%; max-width: 600px; background: var(--glass);
-        padding: 30px; border-radius: 20px; backdrop-filter: blur(16px);
-        border: 1px solid var(--glass-border);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 30px rgba(44,111,189,0.15);
-        position: relative; z-index: 1;
-    }
-
-    .story-img {
-        width: 100%; height: 300px; object-fit: cover; border-radius: 15px; margin-bottom: 20px;
-        border: 2px solid rgba(255,255,255,0.15);
-        box-shadow: 0 0 25px rgba(44,111,189,0.3);
-        transition: opacity 0.25s ease;
-    }
+    /* Metin alanı */
+    .body { padding:26px 28px 24px; }
 
     h2 {
-        font-family: 'Great Vibes', cursive; font-size: 40px; margin-top: 0;
-        background: linear-gradient(90deg, var(--gold), var(--blue-light));
-        -webkit-background-clip: text; background-clip: text; color: transparent;
+        font-family:'Cormorant Garamond',serif;
+        font-size:clamp(22px,5vw,30px); font-style:italic; font-weight:600;
+        color:var(--mist); margin-bottom:14px; line-height:1.25;
+        min-height:2.6em;
+        transition:opacity .3s ease;
     }
-    p.question { font-size: 17px; line-height: 1.55; min-height: 80px; color: rgba(234,244,252,0.92); }
-
-    .dots { display: flex; justify-content: center; gap: 8px; margin: 14px 0 4px 0; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(234,244,252,0.25); transition: 0.3s; }
-    .dot.active { background: var(--gold); box-shadow: 0 0 8px rgba(244,201,93,0.7); transform: scale(1.2); }
-
-    .controls { display: flex; justify-content: space-between; margin-top: 20px; }
-
-    button {
-        padding: 10px 25px; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif;
-        font-weight: 600; cursor: pointer; transition: 0.3s; color: white;
+    p.story {
+        font-family:'Cormorant Garamond',serif;
+        font-size:clamp(15px,3.5vw,18px); font-style:italic; font-weight:300;
+        color:rgba(200,232,248,.82); line-height:1.75; min-height:5.5em;
+        transition:opacity .3s ease;
     }
-    .btn-nav { background: linear-gradient(45deg, var(--blue-primary), var(--blue-light)); }
-    .btn-nav:hover { box-shadow: 0 5px 18px rgba(142,205,240,0.45); }
-    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
 
-    .btn-home {
-        margin-top: 20px; background: transparent; border: 1px solid rgba(255,255,255,0.4); color: var(--blue-pale);
-        position: relative; z-index: 1;
+    /* Nokta navigasyonu */
+    .dots { display:flex; justify-content:center; gap:7px; margin:22px 0 20px; }
+    .dot {
+        width:7px; height:7px; border-radius:50%;
+        background:rgba(200,232,248,.2); transition:.3s; cursor:pointer;
     }
-    .btn-home:hover { background: rgba(255,255,255,0.1); }
-    @media (prefers-reduced-motion: reduce) { .star { animation: none; } }
+    .dot.on { background:var(--honey); box-shadow:0 0 8px rgba(245,201,87,.7); transform:scale(1.25); }
+
+    /* Kontroller */
+    .ctrl { display:flex; justify-content:space-between; align-items:center; }
+    .nav-btn {
+        padding:10px 26px; border:none; border-radius:26px;
+        font-family:'Poppins',sans-serif; font-size:13px; font-weight:600;
+        cursor:pointer; color:#fff; transition:.22s;
+        background:linear-gradient(135deg,var(--azure),var(--sky));
+        box-shadow:0 6px 18px rgba(45,111,189,.35);
+    }
+    .nav-btn:hover { filter:brightness(1.1); }
+    .nav-btn:active { transform:scale(.97); }
+    .nav-btn:disabled { opacity:.3; cursor:not-allowed; filter:none; box-shadow:none; }
+    .nav-btn.gold { background:linear-gradient(135deg,var(--ember),var(--honey)); box-shadow:0 6px 18px rgba(245,201,87,.35); }
+
+    .back-btn {
+        position:relative; z-index:1; margin-top:20px;
+        padding:9px 24px; border:1.5px solid rgba(107,184,232,.38);
+        background:transparent; color:var(--sky); border-radius:26px;
+        font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:.22s;
+    }
+    .back-btn:hover { background:var(--sky); color:var(--ink); }
+    @media (prefers-reduced-motion:reduce) { .card,.img-wrap img,h2,p.story { animation:none; transition:none; } .card{opacity:1} }
 </style>
 </head>
 <body>
+<canvas id="cv"></canvas>
 
-    <div id="stars"></div>
-
-    <div class="story-container">
-        <h2>Turluk Masalı</h2>
-        <img id="sceneImg" class="story-img" src="masal1.jpg" alt="Masal Sahnesi">
-        <p class="question" id="sceneText">Yükleniyor...</p>
+<div class="card">
+    <div class="img-wrap">
+        <img id="sImg" src="masal1.jpg" alt="">
+        <div class="img-overlay"></div>
+        <span class="chapter-badge" id="chBadge">Bölüm 1 / 6</span>
+    </div>
+    <div class="body">
+        <h2 id="sTitle">Yükleniyor...</h2>
+        <p class="story" id="sText">Yükleniyor...</p>
         <div class="dots" id="dots"></div>
-
-        <div class="controls">
-            <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">Geri</button>
-            <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">İleri</button>
+        <div class="ctrl">
+            <button class="nav-btn" id="prevBtn" onclick="go(-1)">← Geri</button>
+            <button class="nav-btn gold" id="nextBtn" onclick="go(1)">İleri →</button>
         </div>
     </div>
+</div>
 
-    <button class="btn-home" onclick="window.location.href='./oyun.html'">Oyun Menüsüne Dön</button>
+<button class="back-btn" onclick="location.href='oyun.html'">← Oyun Menüsüne Dön</button>
 
 <script>
-    // Yıldız alanı
-    (function(){
-        const starsEl = document.getElementById('stars');
-        for (let i = 0; i < 40; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            const size = Math.random() * 2 + 1;
-            s.style.width = size + 'px';
-            s.style.height = size + 'px';
-            s.style.top = Math.random() * 100 + '%';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.animationDelay = (Math.random() * 3) + 's';
-            s.style.animationDuration = (2 + Math.random() * 3) + 's';
-            starsEl.appendChild(s);
-        }
-    })();
+/* Canvas */
+(function(){
+    const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+    let W,H,st=[];
+    const resize=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;};
+    const mk=()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.3,a:Math.random(),da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1)});
+    function draw(){ctx.clearRect(0,0,W,H);st.forEach(s=>{s.a=Math.max(.04,Math.min(.88,s.a+s.da));if(s.a<=.04||s.a>=.88)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();});requestAnimationFrame(draw);}
+    addEventListener('resize',()=>{resize();st=Array.from({length:70},mk);});
+    resize();st=Array.from({length:70},mk);draw();
+})();
 
-    // Hikaye Slaytları ve Soruları (Metinleri istediğin gibi değiştirebilirsin)
-    const slides = [
-        { img: 'masal1.jpg', text: "Masalımız başlıyor... Gözlerimi senden alamadığım o ilk anı hatırlıyor musun? Sence benim o an aklımdan geçen ilk cümle neydi?" },
-        { img: 'masal2.jpg', text: "Zaman su gibi akıp gitti ve biz her manzarayı birlikte güzelleştirdik. Sence ikimizin yan yana en çok yakıştığı an hangisiydi?" },
-        { img: 'masal3.jpg', text: "Bazen çok ciddi, bazen de böyle dünyanın en komik iki insanı olduk. Benim en çok hangi huyuma gülüyorsun?" },
-        { img: 'masal4.jpg', text: "Tarihin, yılların ve zamanın durduğu yerlerde bile bizim hikayemiz akmaya devam etti. Gelecekte benimle gitmek istediğin ilk yer neresi?" },
-        { img: 'masal5.jpg', text: "Bana böyle huzurla yaslandığında dünyadaki tüm dertler bitiyor... Peki sen bana bakınca ne hissediyorsun?" },
-        { img: 'masal6.jpg', text: "Ve masalın bu bölümünün sonu... Ama bizim hikayemiz sonsuz. Bu hikayenin başrolü olduğun için teşekkür ederim. Seni Seviyorum! ❤️" }
-    ];
+/* Hikaye */
+const slides=[
+    {img:'masal1.jpg', title:'İlk Bakış', text:'Masalımız başlıyor... Gözlerimi senden alamadığım o ilk anı hatırlıyor musun? Sence aklımdan geçen ilk cümle neydi?'},
+    {img:'masal2.jpg', title:'Birlikte Akıp Giderken', text:'Zaman su gibi aktı ve biz her manzarayı birlikte güzelleştirdik. Sence ikimizin yan yana en çok yakıştığı an hangisiydi?'},
+    {img:'masal3.jpg', title:'Gülüşlerin Arasında', text:'Bazen çok ciddi, bazen dünyanın en komik iki insanı olduk. Benim hangi huyuma en çok gülersin?'},
+    {img:'masal4.jpg', title:'Zaman Durduğunda', text:'Tarihin, yılların ve zamanın durduğu yerlerde bile bizim hikayemiz akmaya devam etti. Benimle gitmek istediğin ilk yer neresi?'},
+    {img:'masal5.jpg', title:'Huzurun Adı', text:'Bana böyle huzurla yaslandığında dünyadaki tüm dertler bitiyor. Peki sen bana bakınca ne hissediyorsun?'},
+    {img:'masal6.jpg', title:'Ve Sonsuzluğa...', text:'Bu bölümün sonu... ama bizim hikayemiz sonsuz. Bu hikayenin başrolü olduğun için teşekkür ederim. Seni Seviyorum! ❤️'},
+];
 
-    let currentIndex = 0;
+let idx=0;
 
-    function buildDots() {
-        const dotsEl = document.getElementById('dots');
-        dotsEl.innerHTML = '';
-        slides.forEach((_, i) => {
-            const d = document.createElement('div');
-            d.className = 'dot' + (i === currentIndex ? ' active' : '');
-            dotsEl.appendChild(d);
-        });
-    }
+function buildDots(){
+    const el=document.getElementById('dots');
+    el.innerHTML='';
+    slides.forEach((_,i)=>{
+        const d=document.createElement('div');
+        d.className='dot'+(i===idx?' on':'');
+        d.onclick=()=>goTo(i);
+        el.appendChild(d);
+    });
+}
 
-    function updateSlide() {
-        const img = document.getElementById('sceneImg');
-        img.style.opacity = 0;
-        setTimeout(() => {
-            img.src = slides[currentIndex].img;
-            img.style.opacity = 1;
-        }, 200);
-
-        document.getElementById('sceneText').innerText = slides[currentIndex].text;
-        document.getElementById('prevBtn').disabled = currentIndex === 0;
-
-        if (currentIndex === slides.length - 1) {
-            document.getElementById('nextBtn').innerText = "Bitir";
-        } else {
-            document.getElementById('nextBtn').innerText = "İleri";
-        }
+function goTo(n){
+    const img=document.getElementById('sImg');
+    const title=document.getElementById('sTitle');
+    const text=document.getElementById('sText');
+    img.style.opacity='0'; title.style.opacity='0'; text.style.opacity='0';
+    setTimeout(()=>{
+        idx=n;
+        img.src=slides[idx].img;
+        title.textContent=slides[idx].title;
+        text.textContent=slides[idx].text;
+        document.getElementById('chBadge').textContent=`Bölüm ${idx+1} / ${slides.length}`;
+        img.style.opacity='1'; title.style.opacity='1'; text.style.opacity='1';
+        document.getElementById('prevBtn').disabled=(idx===0);
+        const nb=document.getElementById('nextBtn');
+        nb.textContent= idx===slides.length-1 ? 'Bitir ✓' : 'İleri →';
+        nb.className='nav-btn '+(idx===slides.length-1?'gold':'');
         buildDots();
-    }
+    },280);
+}
 
-    function changeSlide(direction) {
-        if (direction === 1 && currentIndex === slides.length - 1) {
-            window.location.href = './oyun.html'; // Sona gelince menüye atar
-            return;
-        }
+function go(dir){
+    if(dir===1 && idx===slides.length-1){ location.href='oyun.html'; return; }
+    if(dir===-1 && idx===0) return;
+    goTo(idx+dir);
+}
 
-        currentIndex += direction;
-        updateSlide();
-    }
+/* Klavye */
+document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight') go(1);
+    if(e.key==='ArrowLeft')  go(-1);
+});
 
-    // İlk slaytı yükle
-    updateSlide();
+goTo(0);
 </script>
-
 </body>
 </html>
