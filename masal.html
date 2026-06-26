@@ -6,55 +6,109 @@
 <title>Turluk Masalı 📖</title>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-    body {
-        margin: 0; font-family: 'Poppins', sans-serif; background: #2c3e50; color: white;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
-        text-align: center; overflow: hidden;
+    :root {
+        --night-deep: #0B1D3A;
+        --night-mid: #142D52;
+        --blue-primary: #2C6FBD;
+        --blue-light: #8ECDF0;
+        --blue-pale: #EAF4FC;
+        --gold: #F4C95D;
+        --glass: rgba(255,255,255,0.07);
+        --glass-border: rgba(255,255,255,0.16);
     }
-    
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; font-family: 'Poppins', sans-serif;
+        background: linear-gradient(160deg, var(--night-deep) 0%, var(--night-mid) 100%);
+        color: var(--blue-pale);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+        text-align: center; overflow: hidden; position: relative;
+    }
+
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.2; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%, 100% { opacity: .12; } 50% { opacity: .85; } }
+
     .story-container {
-        width: 90%; max-width: 600px; background: rgba(255, 255, 255, 0.1);
-        padding: 30px; border-radius: 20px; backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        width: 90%; max-width: 600px; background: var(--glass);
+        padding: 30px; border-radius: 20px; backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 30px rgba(44,111,189,0.15);
+        position: relative; z-index: 1;
     }
 
     .story-img {
         width: 100%; height: 300px; object-fit: cover; border-radius: 15px; margin-bottom: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: opacity 0.5s;
+        border: 2px solid rgba(255,255,255,0.15);
+        box-shadow: 0 0 25px rgba(44,111,189,0.3);
+        transition: opacity 0.25s ease;
     }
 
-    h2 { font-family: 'Great Vibes', cursive; font-size: 40px; color: #ff9a9e; margin-top: 0; }
-    p.question { font-size: 18px; line-height: 1.5; min-height: 80px; }
+    h2 {
+        font-family: 'Great Vibes', cursive; font-size: 40px; margin-top: 0;
+        background: linear-gradient(90deg, var(--gold), var(--blue-light));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    p.question { font-size: 17px; line-height: 1.55; min-height: 80px; color: rgba(234,244,252,0.92); }
+
+    .dots { display: flex; justify-content: center; gap: 8px; margin: 14px 0 4px 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(234,244,252,0.25); transition: 0.3s; }
+    .dot.active { background: var(--gold); box-shadow: 0 0 8px rgba(244,201,93,0.7); transform: scale(1.2); }
 
     .controls { display: flex; justify-content: space-between; margin-top: 20px; }
-    
+
     button {
         padding: 10px 25px; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif;
-        font-weight: 600; cursor: pointer; transition: 0.3s;
+        font-weight: 600; cursor: pointer; transition: 0.3s; color: white;
     }
-    .btn-nav { background: #ff9a9e; color: #2c3e50; }
-    .btn-nav:hover { background: #fad0c4; }
-    .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .btn-home { margin-top: 20px; background: transparent; border: 1px solid white; color: white; }
+    .btn-nav { background: linear-gradient(45deg, var(--blue-primary), var(--blue-light)); }
+    .btn-nav:hover { box-shadow: 0 5px 18px rgba(142,205,240,0.45); }
+    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+    .btn-home {
+        margin-top: 20px; background: transparent; border: 1px solid rgba(255,255,255,0.4); color: var(--blue-pale);
+        position: relative; z-index: 1;
+    }
+    .btn-home:hover { background: rgba(255,255,255,0.1); }
+    @media (prefers-reduced-motion: reduce) { .star { animation: none; } }
 </style>
 </head>
 <body>
+
+    <div id="stars"></div>
 
     <div class="story-container">
         <h2>Turluk Masalı</h2>
         <img id="sceneImg" class="story-img" src="masal1.jpg" alt="Masal Sahnesi">
         <p class="question" id="sceneText">Yükleniyor...</p>
-        
+        <div class="dots" id="dots"></div>
+
         <div class="controls">
             <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">Geri</button>
             <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">İleri</button>
         </div>
     </div>
-    
+
     <button class="btn-home" onclick="window.location.href='./oyun.html'">Oyun Menüsüne Dön</button>
 
 <script>
+    // Yıldız alanı
+    (function(){
+        const starsEl = document.getElementById('stars');
+        for (let i = 0; i < 40; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const size = Math.random() * 2 + 1;
+            s.style.width = size + 'px';
+            s.style.height = size + 'px';
+            s.style.top = Math.random() * 100 + '%';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.animationDelay = (Math.random() * 3) + 's';
+            s.style.animationDuration = (2 + Math.random() * 3) + 's';
+            starsEl.appendChild(s);
+        }
+    })();
+
     // Hikaye Slaytları ve Soruları (Metinleri istediğin gibi değiştirebilirsin)
     const slides = [
         { img: 'masal1.jpg', text: "Masalımız başlıyor... Gözlerimi senden alamadığım o ilk anı hatırlıyor musun? Sence benim o an aklımdan geçen ilk cümle neydi?" },
@@ -67,17 +121,33 @@
 
     let currentIndex = 0;
 
+    function buildDots() {
+        const dotsEl = document.getElementById('dots');
+        dotsEl.innerHTML = '';
+        slides.forEach((_, i) => {
+            const d = document.createElement('div');
+            d.className = 'dot' + (i === currentIndex ? ' active' : '');
+            dotsEl.appendChild(d);
+        });
+    }
+
     function updateSlide() {
-        document.getElementById('sceneImg').src = slides[currentIndex].img;
+        const img = document.getElementById('sceneImg');
+        img.style.opacity = 0;
+        setTimeout(() => {
+            img.src = slides[currentIndex].img;
+            img.style.opacity = 1;
+        }, 200);
+
         document.getElementById('sceneText').innerText = slides[currentIndex].text;
-        
         document.getElementById('prevBtn').disabled = currentIndex === 0;
-        
+
         if (currentIndex === slides.length - 1) {
             document.getElementById('nextBtn').innerText = "Bitir";
         } else {
             document.getElementById('nextBtn').innerText = "İleri";
         }
+        buildDots();
     }
 
     function changeSlide(direction) {
@@ -85,7 +155,7 @@
             window.location.href = './oyun.html'; // Sona gelince menüye atar
             return;
         }
-        
+
         currentIndex += direction;
         updateSlide();
     }
