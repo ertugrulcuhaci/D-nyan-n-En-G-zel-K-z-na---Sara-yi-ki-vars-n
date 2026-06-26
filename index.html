@@ -4,179 +4,349 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emine Sara'm ❤️</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --night-deep: #0B1D3A;
-            --night-mid: #163A66;
-            --blue-primary: #2C6FBD;
-            --blue-light: #8ECDF0;
-            --blue-pale: #EAF4FC;
-            --rose: #FF6F91;
-            --gold: #F4C95D;
-            --glass: rgba(255,255,255,0.07);
-            --glass-border: rgba(255,255,255,0.18);
+            --ink:      #0A1628;
+            --deep:     #112240;
+            --mid:      #1C3A64;
+            --azure:    #2D6FBD;
+            --sky:      #6BB8E8;
+            --mist:     #C8E8F8;
+            --parchment:#EBF5FD;
+            --ember:    #FF6B8A;
+            --honey:    #F5C957;
+            --frost:    rgba(255,255,255,0.06);
+            --rim:      rgba(255,255,255,0.13);
         }
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0; font-family: 'Poppins', sans-serif; text-align: center;
-            background: radial-gradient(ellipse at top, var(--night-mid), var(--night-deep) 70%);
-            height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; overflow: hidden;
-            position: relative; color: var(--blue-pale);
+            font-family: 'Poppins', sans-serif;
+            background: var(--ink);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+            color: var(--parchment);
         }
 
-        /* Yıldızlı gece efekti */
-        #stars { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
-        .star {
-            position: absolute; background: #fff; border-radius: 50%;
-            opacity: 0.2; animation: twinkle 3s ease-in-out infinite;
+        /* ── Arka plan ── */
+        #canvas {
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none;
         }
-        @keyframes twinkle { 0%, 100% { opacity: .15; } 50% { opacity: .9; } }
 
-        .shooting-star {
-            position: fixed; top: 12%; left: -10%; width: 2px; height: 2px;
-            background: white; border-radius: 50%;
-            box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
-            animation: shoot 7s linear infinite; animation-delay: 3s;
-            z-index: -1; opacity: 0;
+        /* ── Fotoğraf arka planı ── */
+        .bg-mosaic {
+            position: fixed; inset: 0; z-index: 1;
+            display: flex; flex-wrap: wrap; gap: 8px;
+            align-content: center; justify-content: center;
+            padding: 8px;
+            filter: blur(8px) brightness(0.38) saturate(1.1);
+            transform: scale(1.05);
+            pointer-events: none;
         }
+        .bg-mosaic img {
+            width: 180px; height: 120px;
+            object-fit: cover; border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        /* ── Kart ── */
+        .card {
+            position: relative; z-index: 10;
+            background: var(--frost);
+            border: 1px solid var(--rim);
+            border-radius: 28px;
+            padding: 44px 40px 40px;
+            max-width: 92%; width: 480px;
+            backdrop-filter: blur(24px);
+            box-shadow:
+                0 30px 70px rgba(0,0,0,0.55),
+                0 0 0 1px rgba(255,255,255,0.04),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            animation: riseUp 1s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes riseUp {
+            from { opacity: 0; transform: translateY(32px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0)  scale(1); }
+        }
+
+        /* ── Üst hat ── */
+        .top-line {
+            width: 48px; height: 2px; margin: 0 auto 22px;
+            background: linear-gradient(90deg, var(--ember), var(--honey));
+            border-radius: 2px;
+        }
+
+        /* ── İsim ── */
+        .name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(30px, 7vw, 46px);
+            font-weight: 600; font-style: italic;
+            letter-spacing: .5px; line-height: 1.1;
+            background: linear-gradient(135deg, var(--honey) 0%, var(--sky) 60%, var(--mist) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 8px;
+        }
+        .tagline {
+            font-size: 12px; font-weight: 300; letter-spacing: 2px;
+            text-transform: uppercase; color: rgba(200,232,248,0.45);
+            margin-bottom: 32px;
+        }
+
+        /* ── Sayaç ── */
+        .timer-section { margin-bottom: 30px; }
+        .timer-label {
+            font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+            color: rgba(200,232,248,0.4); margin-bottom: 12px;
+            transition: color .4s;
+        }
+        .timer-label.bday { color: rgba(255,107,138,.6); }
+
+        .timer-row { display: flex; justify-content: center; gap: 8px; }
+        .t-box {
+            flex: 1; max-width: 80px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; padding: 12px 6px 10px;
+            position: relative; overflow: hidden;
+            transition: border-color .4s, background .4s;
+        }
+        .t-box::before {
+            content: ''; position: absolute;
+            inset: 0; border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        .t-box.bday { border-color: rgba(255,107,138,.22); background: rgba(255,107,138,.07); }
+        .t-num {
+            display: block; font-size: 22px; font-weight: 600; line-height: 1;
+            color: var(--sky); text-shadow: 0 0 16px rgba(107,184,232,.4);
+            transition: color .4s, text-shadow .4s;
+            font-variant-numeric: tabular-nums;
+        }
+        .t-box.bday .t-num { color: var(--ember); text-shadow: 0 0 16px rgba(255,107,138,.4); }
+        .t-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(200,232,248,.45); margin-top: 5px; display: block; }
+
+        /* ── Doğum günü banner ── */
+        #bday-banner {
+            display: none;
+            border: 1px solid rgba(255,107,138,.3);
+            border-radius: 12px;
+            padding: 10px 16px; margin-bottom: 20px;
+            font-size: 13px; font-weight: 500;
+            color: rgba(235,245,253,.85);
+            background: rgba(255,107,138,.1);
+            animation: glow 2.5s ease-in-out infinite;
+        }
+        @keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgba(255,107,138,0); } 50% { box-shadow: 0 0 22px 4px rgba(255,107,138,.2); } }
+
+        /* ── Butonlar ── */
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+        .btn {
+            display: block; width: 100%;
+            padding: 14px 20px; border: none; border-radius: 50px;
+            font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+            cursor: pointer; color: #fff; text-align: center;
+            transition: transform .2s, box-shadow .2s, filter .2s;
+            letter-spacing: .3px;
+        }
+        .btn:hover  { transform: translateY(-2px) scale(1.02); }
+        .btn:active { transform: scale(.98); }
+        .btn-games {
+            background: linear-gradient(135deg, var(--azure) 0%, var(--sky) 100%);
+            box-shadow: 0 8px 24px rgba(45,111,189,.4);
+        }
+        .btn-games:hover { box-shadow: 0 12px 30px rgba(107,184,232,.45); }
+        .btn-ask {
+            background: linear-gradient(135deg, var(--ember) 0%, var(--honey) 100%);
+            box-shadow: 0 8px 24px rgba(255,107,138,.35);
+        }
+        .btn-ask:hover { box-shadow: 0 12px 30px rgba(245,201,87,.4); }
+        .btn-bday {
+            display: none;
+            background: linear-gradient(135deg, #C94040 0%, var(--ember) 100%);
+            box-shadow: 0 8px 24px rgba(201,64,64,.4);
+        }
+
+        /* ── Alt imza ── */
+        .signature {
+            margin-top: 26px; font-size: 11px; font-weight: 300;
+            color: rgba(200,232,248,.25); letter-spacing: 1.5px;
+        }
+
+        /* ── Shooting star ── */
+        .shoot {
+            position: fixed; width: 2px; height: 2px;
+            background: #fff; border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255,255,255,.7);
+            animation: shoot 8s linear infinite; opacity: 0;
+            z-index: 2; pointer-events: none;
+        }
+        .shoot:nth-child(1) { top: 8%;  left: 0%; animation-delay: 2s;  animation-duration: 7s; }
+        .shoot:nth-child(2) { top: 20%; left: 0%; animation-delay: 11s; animation-duration: 6s; }
         @keyframes shoot {
-            0% { transform: translate(0,0); opacity: 0; }
-            4% { opacity: 1; }
-            22% { transform: translate(70vw, 35vh); opacity: 0; }
+            0%   { transform: translate(0,0); opacity: 0; }
+            3%   { opacity: .9; }
+            20%  { transform: translate(65vw, 32vh); opacity: 0; }
             100% { opacity: 0; }
         }
 
-        /* Arka Plan Resimleri */
-        .bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            flex-wrap: wrap; gap: 15px;
-            filter: blur(6px) brightness(0.55) saturate(1.3) hue-rotate(190deg);
-            z-index: -3; opacity: 0.35;
+        @media (max-width: 400px) {
+            .card { padding: 32px 22px 30px; }
+            .t-num { font-size: 18px; }
         }
-        .bg img { width: 300px; height: 200px; object-fit: cover; border-radius: 20px; }
-
-        /* İçerik */
-        .content {
-            background: var(--glass); padding: 40px;
-            border-radius: 35px; backdrop-filter: blur(18px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 40px rgba(44,111,189,0.18);
-            max-width: 90%; width: 500px; z-index: 10;
-            animation: riseIn 1s ease;
-        }
-        @keyframes riseIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        h1 {
-            font-family: 'Great Vibes', cursive; font-size: clamp(34px, 9vw, 52px);
-            margin: 0 0 6px 0;
-            background: linear-gradient(90deg, var(--gold), var(--blue-light));
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .subtitle {
-            font-size: 13px; letter-spacing: 0.4px;
-            color: rgba(234,244,252,0.65); margin: 0 0 26px 0;
-        }
-
-        /* Sayaç */
-        .timer-boxes { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        .time-box {
-            background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border);
-            padding: 10px; border-radius: 15px; min-width: 60px;
-        }
-        .time-num {
-            font-size: 20px; font-weight: 600; color: var(--blue-light);
-            display: block; text-shadow: 0 0 12px rgba(142,205,240,0.5);
-        }
-        .time-label { font-size: 10px; color: rgba(234,244,252,0.55); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Butonlar */
-        .btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
-        .play-btn {
-            padding: 15px 30px; font-size: 17px; font-weight: 600; font-family: 'Poppins', sans-serif;
-            border: none; border-radius: 50px; cursor: pointer; color: white; width: 100%;
-            transition: 0.3s;
-        }
-        .btn-game {
-            background: linear-gradient(45deg, var(--blue-primary), var(--blue-light));
-            box-shadow: 0 8px 20px rgba(44,111,189,0.4);
-        }
-        .btn-question {
-            background: linear-gradient(45deg, var(--rose), var(--gold));
-            box-shadow: 0 8px 20px rgba(255,111,145,0.35);
-        }
-        .play-btn:hover { transform: scale(1.05) translateY(-2px); }
         @media (prefers-reduced-motion: reduce) {
-            .star, .shooting-star, .content { animation: none; }
+            .card, .shoot { animation: none; }
+            .card { opacity: 1; }
         }
     </style>
 </head>
-
 <body>
 
-    <div id="stars"></div>
-    <div class="shooting-star"></div>
+<canvas id="canvas"></canvas>
+<div class="shoot"></div>
+<div class="shoot"></div>
 
-    <div class="bg">
-        <img src="masal1.jpg"> <img src="masal2.jpg"> <img src="masal3.jpg">
-        <img src="masal4.jpg"> <img src="masal5.jpg">
+<div class="bg-mosaic">
+    <img src="masal1.jpg"><img src="masal2.jpg"><img src="masal3.jpg">
+    <img src="masal4.jpg"><img src="masal5.jpg"><img src="masal1.jpg">
+    <img src="masal2.jpg"><img src="masal3.jpg">
+</div>
+
+<div class="card">
+    <div class="top-line"></div>
+    <h1 class="name">Emine Sara Gözükara</h1>
+    <p class="tagline">Gökyüzündeki en parlak yıldızım ✦</p>
+
+    <div id="bday-banner">🎂 Bugün doğum günün! Sürprize bak 🎉</div>
+
+    <div class="timer-section">
+        <p class="timer-label" id="tlabel">Birlikteliğimiz</p>
+        <div class="timer-row">
+            <div class="t-box" id="tb-d"><span class="t-num" id="td">00</span><span class="t-lbl" id="tl-d">Gün</span></div>
+            <div class="t-box" id="tb-h"><span class="t-num" id="th">00</span><span class="t-lbl" id="tl-h">Saat</span></div>
+            <div class="t-box" id="tb-m"><span class="t-num" id="tm">00</span><span class="t-lbl" id="tl-m">Dk</span></div>
+            <div class="t-box" id="tb-s"><span class="t-num" id="ts">00</span><span class="t-lbl" id="tl-s">Sn</span></div>
+        </div>
     </div>
 
-    <div class="content">
-        <h1>Emine Sara Gözükara</h1>
-        <p class="subtitle">Seninle geçen her an, gökyüzündeki en parlak yıldız ✨</p>
-
-        <div class="timer-boxes">
-            <div class="time-box"><span class="time-num" id="d">00</span><span class="time-label">Gün</span></div>
-            <div class="time-box"><span class="time-num" id="h">00</span><span class="time-label">Saat</span></div>
-            <div class="time-box"><span class="time-num" id="m">00</span><span class="time-label">Dk</span></div>
-            <div class="time-box"><span class="time-num" id="s">00</span><span class="time-label">Sn</span></div>
-        </div>
-
-        <div class="btn-group">
-            <button class="play-btn btn-game" onclick="window.location.href='oyun.html'">🎮 Oyun Oynayalım</button>
-            <button class="play-btn btn-question" onclick="window.location.href='soru.html'">🥺 Sana Bir Sorum Var</button>
-        </div>
+    <div class="btn-stack">
+        <button class="btn btn-games" onclick="location.href='oyun.html'">🎮 &nbsp;Oyun Oynayalım</button>
+        <button class="btn btn-ask"   onclick="location.href='soru.html'">🥺 &nbsp;Sana Bir Sorum Var</button>
+        <button class="btn btn-bday"  id="bdayBtn" onclick="location.href='dogumgunu.html'">🎂 &nbsp;Doğum Günü Sürprizi</button>
     </div>
+
+    <p class="signature">with love · always</p>
+</div>
 
 <script>
-    // Yıldız alanı
-    (function(){
-        const starsEl = document.getElementById('stars');
-        for (let i = 0; i < 45; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            const size = Math.random() * 2 + 1;
-            s.style.width = size + 'px';
-            s.style.height = size + 'px';
-            s.style.top = Math.random() * 100 + '%';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.animationDelay = (Math.random() * 3) + 's';
-            s.style.animationDuration = (2 + Math.random() * 3) + 's';
-            starsEl.appendChild(s);
-        }
-    })();
-
-    // Sayaç
-    const startDate = new Date("2026-04-28T00:00:00");
-
-    function updateTimer() {
-        const now = new Date();
-        const diff = now - startDate;
-        if (diff < 0) return;
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / 1000 / 60) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        document.getElementById("d").innerText = days.toString().padStart(2, '0');
-        document.getElementById("h").innerText = hours.toString().padStart(2, '0');
-        document.getElementById("m").innerText = minutes.toString().padStart(2, '0');
-        document.getElementById("s").innerText = seconds.toString().padStart(2, '0');
+/* ── Star canvas ── */
+(function () {
+    const cv = document.getElementById('canvas');
+    const ctx = cv.getContext('2d');
+    let W, H, stars = [];
+    function resize() {
+        W = cv.width  = innerWidth;
+        H = cv.height = innerHeight;
     }
-    setInterval(updateTimer, 1000);
-    updateTimer();
+    function mkStar() {
+        return {
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 1.2 + .3,
+            a: Math.random(),
+            da: (Math.random() * .004 + .001) * (Math.random() < .5 ? 1 : -1),
+            speed: Math.random() * .03 + .005
+        };
+    }
+    function init() { resize(); stars = Array.from({ length: 90 }, mkStar); }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+            s.a = Math.max(.05, Math.min(.95, s.a + s.da));
+            if (s.a <= .05 || s.a >= .95) s.da *= -1;
+            s.y -= s.speed;
+            if (s.y < 0) { s.y = H; s.x = Math.random() * W; }
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+            ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize', () => { resize(); stars = Array.from({ length: 90 }, mkStar); });
+    init(); draw();
+})();
+
+/* ── Timer logic ── */
+const START   = new Date("2026-04-28T00:00:00");
+const BDAY_M  = 7, BDAY_D = 10;
+const BIRTH_Y = 2001;
+
+function isBday() {
+    const n = new Date();
+    return n.getMonth() + 1 === BDAY_M && n.getDate() === BDAY_D;
+}
+function isBdayWeek() {
+    const n = new Date(), thisY = n.getFullYear();
+    const bd = new Date(thisY, BDAY_M - 1, BDAY_D);
+    const diff = bd - n;
+    return diff > 0 && diff <= 7 * 86400000;
+}
+function nextBday() {
+    const n = new Date(); let y = n.getFullYear();
+    let bd = new Date(y, BDAY_M - 1, BDAY_D);
+    if (bd <= n) bd = new Date(y + 1, BDAY_M - 1, BDAY_D);
+    return bd;
+}
+function pad(v) { return String(v).padStart(2, '0'); }
+function setBdayMode(on) {
+    ['tb-d','tb-h','tb-m','tb-s'].forEach(id => {
+        document.getElementById(id).classList.toggle('bday', on);
+    });
+    document.getElementById('tlabel').classList.toggle('bday', on);
+}
+function tick() {
+    const n = new Date();
+    if (isBday()) {
+        document.getElementById('tlabel').textContent = '🎂 Doğum Günün Kutlu Olsun!';
+        setBdayMode(true);
+        document.getElementById('bday-banner').style.display = 'block';
+        document.getElementById('bdayBtn').style.display = 'block';
+        ['td','th','tm','ts'].forEach((id, i) => document.getElementById(id).textContent = ['🎂','🎉','💙','✨'][i]);
+        ['tl-d','tl-h','tl-m','tl-s'].forEach(id => document.getElementById(id).textContent = '');
+        return;
+    }
+    if (isBdayWeek()) {
+        document.getElementById('tlabel').textContent = '🎂 Doğum Gününe Kalan';
+        setBdayMode(true);
+        document.getElementById('bdayBtn').style.display = 'block';
+        const diff = nextBday() - n;
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff / 3600000) % 24);
+        const m = Math.floor((diff / 60000) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        document.getElementById('td').textContent = pad(d);
+        document.getElementById('th').textContent = pad(h);
+        document.getElementById('tm').textContent = pad(m);
+        document.getElementById('ts').textContent = pad(s);
+        ['tl-d','tl-h','tl-m','tl-s'].forEach((id, i) => document.getElementById(id).textContent = ['Gün','Saat','Dk','Sn'][i]);
+        return;
+    }
+    setBdayMode(false);
+    document.getElementById('tlabel').textContent = 'Birlikteliğimiz';
+    const diff = n - START;
+    if (diff < 0) return;
+    document.getElementById('td').textContent = pad(Math.floor(diff / 86400000));
+    document.getElementById('th').textContent = pad(Math.floor((diff / 3600000) % 24));
+    document.getElementById('tm').textContent = pad(Math.floor((diff / 60000) % 60));
+    document.getElementById('ts').textContent = pad(Math.floor((diff / 1000) % 60));
+    ['tl-d','tl-h','tl-m','tl-s'].forEach((id, i) => document.getElementById(id).textContent = ['Gün','Saat','Dk','Sn'][i]);
+}
+setInterval(tick, 1000); tick();
 </script>
 </body>
 </html>
