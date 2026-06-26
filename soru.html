@@ -1,73 +1,29 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Sana Bir Sorum Var...</title>
     <style>
-        body {
-            margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; color: white;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.1); padding: 50px; border-radius: 40px;
-            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            text-align: center; width: 80%; max-width: 400px;
-            animation: smoothFadeIn 1s ease-out; /* Smooth geçiş */
-        }
-
-        @keyframes smoothFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        h1 { font-size: 2rem; margin-bottom: 30px; }
-
-        .buttons { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
-
-        button {
-            padding: 15px 30px; border: none; border-radius: 25px; cursor: pointer;
-            font-weight: 600; transition: all 0.3s ease;
-        }
-
-        #yesBtn { background: #81d4fa; color: #0f2027; }
-        #yesBtn:hover { transform: scale(1.1); box-shadow: 0 0 20px #81d4fa; }
-
-        #noBtn { background: rgba(255,255,255,0.1); color: white; border: 1px solid white; }
-        #noBtn:hover { background: rgba(255,255,255,0.2); }
-
-        /* Tatlı animasyon: Yüzen kalp */
-        .heart { font-size: 50px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        body { background: #0f2027; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; overflow: hidden; }
+        .box { text-align: center; }
+        .btn-yes { padding: 15px 40px; background: #81d4fa; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-no { padding: 15px 40px; background: transparent; border: 1px solid white; color: white; border-radius: 30px; cursor: pointer; position: absolute; }
     </style>
 </head>
 <body>
-
-    <div class="container" id="mainDiv">
-        <div class="heart">💙</div>
-        <h1>Benimle sonsuza kadar beraber olmaya var mısın?</h1>
-        <div class="buttons">
-            <button id="yesBtn" onclick="answer('evet')">Evet!</button>
-            <button id="noBtn" onclick="answer('hayir')">Hayır</button>
-        </div>
+    <div class="box" id="main">
+        <h1>Benimle bir ömür geçirmeye var mısın?</h1>
+        <button class="btn-yes" onclick="showLove()">Evet! ❤️</button>
+        <button class="btn-no" id="noBtn" onmouseover="moveNo()">Hayır</button>
     </div>
 
-<script>
-    function answer(type) {
-        const div = document.getElementById('mainDiv');
-        div.style.opacity = '0';
-        setTimeout(() => {
-            if(type === 'evet') {
-                div.innerHTML = '<h1>Heheh, Ben de seni çok seviyorum yavrumm ❤️</h1>';
-            } else {
-                div.innerHTML = '<h1> şaka yapıyorsun dimi enayi </h1>';
-            }
-            div.style.opacity = '1';
-        }, 500);
-    }
-</script>
+    <script>
+        function moveNo() {
+            const btn = document.getElementById('noBtn');
+            btn.style.left = Math.random() * 80 + '%';
+            btn.style.top = Math.random() * 80 + '%';
+        }
+        function showLove() {
+            document.getElementById('main').innerHTML = "<h1>Biliyordum! Seni seviyorum Sara! 💙</h1>";
+        }
+    </script>
 </body>
 </html>
