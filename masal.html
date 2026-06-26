@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turluk Masalı 📖</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0; font-family: 'Poppins', sans-serif; background: #2c3e50; color: white;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+        text-align: center; overflow: hidden;
+    }
+    
+    .story-container {
+        width: 90%; max-width: 600px; background: rgba(255, 255, 255, 0.1);
+        padding: 30px; border-radius: 20px; backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .story-img {
+        width: 100%; height: 300px; object-fit: cover; border-radius: 15px; margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: opacity 0.5s;
+    }
+
+    h2 { font-family: 'Great Vibes', cursive; font-size: 40px; color: #ff9a9e; margin-top: 0; }
+    p.question { font-size: 18px; line-height: 1.5; min-height: 80px; }
+
+    .controls { display: flex; justify-content: space-between; margin-top: 20px; }
+    
+    button {
+        padding: 10px 25px; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif;
+        font-weight: 600; cursor: pointer; transition: 0.3s;
+    }
+    .btn-nav { background: #ff9a9e; color: #2c3e50; }
+    .btn-nav:hover { background: #fad0c4; }
+    .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-home { margin-top: 20px; background: transparent; border: 1px solid white; color: white; }
+</style>
+</head>
+<body>
+
+    <div class="story-container">
+        <h2>Turluk Masalı</h2>
+        <img id="sceneImg" class="story-img" src="masal1.jpg" alt="Masal Sahnesi">
+        <p class="question" id="sceneText">Yükleniyor...</p>
+        
+        <div class="controls">
+            <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">Geri</button>
+            <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">İleri</button>
+        </div>
+    </div>
+    
+    <button class="btn-home" onclick="window.location.href='./oyun.html'">Oyun Menüsüne Dön</button>
+
+<script>
+    // Hikaye Slaytları ve Soruları (Metinleri istediğin gibi değiştirebilirsin)
+    const slides = [
+        { img: 'masal1.jpg', text: "Masalımız başlıyor... Gözlerimi senden alamadığım o ilk anı hatırlıyor musun? Sence benim o an aklımdan geçen ilk cümle neydi?" },
+        { img: 'masal2.jpg', text: "Zaman su gibi akıp gitti ve biz her manzarayı birlikte güzelleştirdik. Sence ikimizin yan yana en çok yakıştığı an hangisiydi?" },
+        { img: 'masal3.jpg', text: "Bazen çok ciddi, bazen de böyle dünyanın en komik iki insanı olduk. Benim en çok hangi huyuma gülüyorsun?" },
+        { img: 'masal4.jpg', text: "Tarihin, yılların ve zamanın durduğu yerlerde bile bizim hikayemiz akmaya devam etti. Gelecekte benimle gitmek istediğin ilk yer neresi?" },
+        { img: 'masal5.jpg', text: "Bana böyle huzurla yaslandığında dünyadaki tüm dertler bitiyor... Peki sen bana bakınca ne hissediyorsun?" },
+        { img: 'masal6.jpg', text: "Ve masalın bu bölümünün sonu... Ama bizim hikayemiz sonsuz. Bu hikayenin başrolü olduğun için teşekkür ederim. Seni Seviyorum! ❤️" }
+    ];
+
+    let currentIndex = 0;
+
+    function updateSlide() {
+        document.getElementById('sceneImg').src = slides[currentIndex].img;
+        document.getElementById('sceneText').innerText = slides[currentIndex].text;
+        
+        document.getElementById('prevBtn').disabled = currentIndex === 0;
+        
+        if (currentIndex === slides.length - 1) {
+            document.getElementById('nextBtn').innerText = "Bitir";
+        } else {
+            document.getElementById('nextBtn').innerText = "İleri";
+        }
+    }
+
+    function changeSlide(direction) {
+        if (direction === 1 && currentIndex === slides.length - 1) {
+            window.location.href = './oyun.html'; // Sona gelince menüye atar
+            return;
+        }
+        
+        currentIndex += direction;
+        updateSlide();
+    }
+
+    // İlk slaytı yükle
+    updateSlide();
+</script>
+
+</body>
+</html>
