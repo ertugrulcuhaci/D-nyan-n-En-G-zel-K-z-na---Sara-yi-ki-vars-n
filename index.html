@@ -2,58 +2,53 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emine Sara'm ❤️</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0; font-family: 'Poppins', sans-serif; text-align: center;
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            /* Mavi Gradient: Derin lacivertten turkuaza */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             height: 100vh; display: flex; flex-direction: column;
             justify-content: center; align-items: center; overflow: hidden;
+            color: white;
         }
-        /* Arka Plan Resimleri */
-        .bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            flex-wrap: wrap; gap: 15px; filter: blur(5px); z-index: -1; opacity: 0.2;
-        }
-        .bg img { width: 300px; height: 200px; object-fit: cover; border-radius: 20px; }
 
-        /* İçerik */
+        /* Cam Efekti (Glassmorphism) */
         .content {
-            background: rgba(255, 255, 255, 0.6); padding: 40px;
-            border-radius: 35px; backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 90%; width: 500px; z-index: 10;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 30px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-width: 90%; width: 500px;
+            z-index: 10;
         }
-        h1 { font-family: 'Great Vibes', cursive; font-size: 50px; color: #d81b60; margin: 0 0 20px 0; }
-        
-        /* Sayaç */
-        .timer-boxes { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        .time-box { background: white; padding: 10px; border-radius: 15px; min-width: 60px; }
-        .time-num { font-size: 20px; font-weight: 600; color: #d81b60; display: block; }
-        .time-label { font-size: 10px; color: #777; text-transform: uppercase; }
 
-        /* Butonlar */
-        .btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 55px; color: #81d4fa; margin: 0 0 20px 0; text-shadow: 0 0 10px rgba(129, 212, 250, 0.5); }
+        
+        .timer-boxes { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .time-box { background: rgba(0, 188, 212, 0.2); padding: 15px; border-radius: 15px; min-width: 60px; border: 1px solid rgba(255,255,255,0.1); }
+        .time-num { font-size: 24px; font-weight: 600; color: #ffffff; display: block; }
+        .time-label { font-size: 10px; color: #b3e5fc; text-transform: uppercase; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
         .play-btn {
-            padding: 15px 30px; font-size: 18px; font-family: 'Poppins', sans-serif;
-            border: none; border-radius: 50px; cursor: pointer; color: white; width: 100%;
-            transition: 0.3s;
+            padding: 15px 30px; font-size: 18px; border: none; border-radius: 50px; 
+            cursor: pointer; color: white; width: 100%; transition: 0.4s;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid #81d4fa;
         }
-        .btn-game { background: #ff4b2b; }
-        .btn-question { background: #4A00E0; }
-        .play-btn:hover { transform: scale(1.05); }
+        .play-btn:hover { background: #0288d1; transform: scale(1.05); }
+
+        /* Yıldız Efekti */
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
     </style>
 </head>
-
 <body>
 
-    <div class="bg">
-        <img src="masal1.jpg"> <img src="masal2.jpg"> <img src="masal3.jpg">
-        <img src="masal4.jpg"> <img src="masal5.jpg">
-    </div>
+    <div id="stars"></div>
 
     <div class="content">
         <h1>Emine Sara Gözükara</h1>
@@ -66,18 +61,29 @@
         </div>
 
         <div class="btn-group">
-            <button class="play-btn btn-game" onclick="window.location.href='oyun.html'">🎮 Oyun Oynayalım</button>
-            <button class="play-btn btn-question" onclick="window.location.href='soru.html'">🥺 Sana Bir Sorum Var</button>
+            <button class="play-btn" onclick="window.location.href='oyun.html'">🎮 Oyun Oynayalım</button>
+            <button class="play-btn" onclick="window.location.href='soru.html'">🥺 Sana Bir Sorum Var</button>
         </div>
     </div>
 
 <script>
-    const startDate = new Date("2026-04-28T00:00:00"); 
+    // Yıldız yağmuru efekti
+    const starsContainer = document.getElementById('stars');
+    for(let i=0; i<50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = Math.random()*3 + 'px';
+        star.style.height = star.style.width;
+        star.style.left = Math.random()*100 + 'vw';
+        star.style.top = Math.random()*100 + 'vh';
+        star.style.animationDelay = Math.random()*3 + 's';
+        starsContainer.appendChild(star);
+    }
 
+    const startDate = new Date("2026-04-28T00:00:00"); 
     function updateTimer() {
         const now = new Date();
         const diff = now - startDate;
-        if (diff < 0) return;
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / 1000 / 60) % 60);
@@ -87,8 +93,7 @@
         document.getElementById("m").innerText = minutes.toString().padStart(2, '0');
         document.getElementById("s").innerText = seconds.toString().padStart(2, '0');
     }
-    setInterval(updateTimer, 1000); 
-    updateTimer();
+    setInterval(updateTimer, 1000); updateTimer();
 </script>
 </body>
 </html>
