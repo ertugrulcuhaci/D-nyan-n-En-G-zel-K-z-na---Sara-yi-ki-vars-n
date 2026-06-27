@@ -243,6 +243,15 @@
 </div>
 
 <script>
+/* ── Giriş kontrolü ── */
+// giris.html üzerinden gelmediyse oraya yönlendir
+if(!sessionStorage.getItem('sara_giris')){
+  // Geliştirme kolaylığı için: URL'de ?dev varsa atla
+  if(!location.search.includes('dev')){
+    location.replace('giris.html');
+  }
+}
+
 /* ── Star canvas ── */
 (function () {
     const cv = document.getElementById('canvas');
