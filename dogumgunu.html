@@ -82,8 +82,10 @@
         .btn:active{transform:scale(.98);}
         .btn-games{background:linear-gradient(135deg,var(--azure),var(--sky));box-shadow:0 8px 24px rgba(45,111,189,.4);}
         .btn-ask{background:linear-gradient(135deg,var(--ember),var(--honey));box-shadow:0 8px 24px rgba(255,107,138,.35);}
-        .btn-bday{display:none;background:linear-gradient(135deg,#C94040,var(--ember));box-shadow:0 8px 24px rgba(201,64,64,.4);}
+        .btn-bday{background:linear-gradient(135deg,#C94040,var(--ember));box-shadow:0 8px 24px rgba(201,64,64,.4);}
         .signature{margin-top:26px;font-size:11px;font-weight:300;color:rgba(200,232,248,.25);letter-spacing:1.5px;}
+        .home-link{display:inline-block;margin-top:16px;font-size:12px;color:rgba(107,184,232,.65);text-decoration:none;letter-spacing:.3px;transition:color .2s;}
+        .home-link:hover{color:var(--sky);}
 
         /* ──── MÜZİK MODAL ──── */
         #music-modal {
@@ -141,6 +143,16 @@
         .m-toggle{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,107,138,.3);background:rgba(255,107,138,.2);color:#fff;font-size:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;}
         .m-toggle:hover{background:rgba(255,107,138,.4);}
 
+        /* ──── MÜZİK YEDEK MESAJI (embed çalışmazsa) ──── */
+        #music-fallback{
+            display:none;position:fixed;bottom:20px;left:20px;z-index:100;max-width:230px;
+            background:rgba(12,24,46,.93);border:1px solid rgba(255,107,138,.3);border-radius:20px;
+            padding:13px 16px;backdrop-filter:blur(22px);box-shadow:0 8px 30px rgba(0,0,0,.45);
+            font-size:12px;color:rgba(200,232,248,.85);line-height:1.6;
+        }
+        #music-fallback a{color:var(--ember);font-weight:600;text-decoration:none;}
+        #music-fallback a:hover{text-decoration:underline;}
+
         /* Hidden YouTube container */
         #yt-player{position:fixed;left:-4px;bottom:-4px;width:4px;height:4px;opacity:0;pointer-events:none;overflow:hidden;}
 
@@ -169,7 +181,7 @@
             <div class="vinyl-lines" style="inset:16px;"></div>
         </div>
         <h2 class="m-title">Sana Özel Bir Şarkı</h2>
-        <p class="m-sub">Bu anı müzikle daha güzel kılalım mı?<br>Seni düşünerek seçtim... 🎵</p>
+        <p class="m-sub" id="m-sub-text">Bu anı müzikle daha güzel kılalım mı?<br>Seni düşünerek seçtim... 🎵</p>
         <div class="m-btns">
             <button class="m-btn yes" onclick="startMusic()">🎶 Müziği Aç</button>
             <button class="m-btn no" onclick="skipMusic()">Sessiz devam et</button>
@@ -190,6 +202,12 @@
     <button class="m-toggle" id="m-toggle" onclick="event.stopPropagation();toggleMusic()">⏸</button>
 </div>
 
+<!-- ── Müzik çalışmazsa gösterilecek yedek kutu ── -->
+<div id="music-fallback">
+    🎵 Şarkı bu cihazda/bağlantıda açılamadı.<br>
+    <a href="https://www.youtube.com/watch?v=Fi15jicjMLc" target="_blank" rel="noopener">YouTube'da dinle →</a>
+</div>
+
 <div class="card">
     <div class="top-line"></div>
     <h1 class="name">Emine Sara Gözükara</h1>
@@ -208,11 +226,12 @@
     </div>
 
     <div class="btn-stack">
+        <button class="btn btn-bday"  onclick="location.href='hediye.html'">🎁 &nbsp;Hediyeni Aç</button>
         <button class="btn btn-games" onclick="location.href='oyun.html'">🎮 &nbsp;Oyun Oynayalım</button>
         <button class="btn btn-ask"   onclick="location.href='soru.html'">🥺 &nbsp;Sana Bir Sorum Var</button>
-        <button class="btn btn-bday"  id="bdayBtn" onclick="location.href='dogumgunu.html'">🎂 &nbsp;Doğum Günü Sürprizi</button>
     </div>
     <p class="signature">with love · always</p>
+    <a class="home-link" href="index.html">← Ana Sayfaya Dön</a>
 </div>
 
 <script>
@@ -249,13 +268,12 @@ function tick(){
     const n=new Date();
     if(isBday()){
         document.getElementById('tlabel').textContent='🎂 Doğum Günün Kutlu Olsun!';setBdayMode(true);
-        document.getElementById('bday-banner').style.display='block';document.getElementById('bdayBtn').style.display='block';
+        document.getElementById('bday-banner').style.display='block';
         ['td','th','tm','ts'].forEach((id,i)=>document.getElementById(id).textContent=['🎂','🎉','💙','✨'][i]);
         ['tl-d','tl-h','tl-m','tl-s'].forEach(id=>document.getElementById(id).textContent='');return;
     }
     if(isBdayWeek()){
         document.getElementById('tlabel').textContent='🎂 Doğum Gününe Kalan';setBdayMode(true);
-        document.getElementById('bdayBtn').style.display='block';
         const diff=nextBday()-n,d=Math.floor(diff/86400000),h=Math.floor((diff/3600000)%24),m=Math.floor((diff/60000)%60),s=Math.floor((diff/1000)%60);
         document.getElementById('td').textContent=pad(d);document.getElementById('th').textContent=pad(h);
         document.getElementById('tm').textContent=pad(m);document.getElementById('ts').textContent=pad(s);
@@ -272,11 +290,19 @@ function tick(){
 setInterval(tick,1000);tick();
 
 /* ──── MÜZİK SİSTEMİ ──── */
+// Dosya bilgisayarda yerel olarak (file://) açıldıysa müzik büyük ihtimalle çalışmaz —
+// kullanıcıyı bilgilendiriyoruz, ama yine de denemeye çalışıyoruz.
+if (location.protocol === 'file:') {
+    document.getElementById('m-sub-text').innerHTML =
+        "Bu anı müzikle daha güzel kılalım mı?<br>" +
+        "<span style='color:rgba(255,107,138,.8)'>Not: Dosyayı yerelden açtığın için müzik burada çalışmayabilir — site GitHub Pages'te yayınlandığında sorunsuz çalışacak.</span>";
+}
+
 var ytTag=document.createElement('script');
 ytTag.src='https://www.youtube.com/iframe_api';
 document.head.appendChild(ytTag);
 
-var ytPlayer,ytReady=false,pendingPlay=false,isPlaying=false;
+var ytPlayer,ytReady=false,pendingPlay=false,isPlaying=false,musicFailed=false;
 
 window.onYouTubeIframeAPIReady=function(){
     ytPlayer=new YT.Player('yt-player',{
@@ -295,17 +321,31 @@ window.onYouTubeIframeAPIReady=function(){
                 updateMusicUI();
             },
             onError:function(){
-                // Video oynatılamıyorsa çubuğu gizle
-                document.getElementById('music-bar').style.display='none';
+                // Video oynatılamıyorsa (engelli/silinmiş/vb.) yedek mesajı göster
+                showMusicFallback();
             }
         }
     });
 };
 
+function showMusicFallback(){
+    if(musicFailed) return;
+    musicFailed=true;
+    document.getElementById('music-bar').style.display='none';
+    document.getElementById('music-fallback').style.display='block';
+}
+
 function startMusic(){
     hideMusicModal();
-    if(ytReady){ytPlayer.playVideo();}else{pendingPlay=true;}
     document.getElementById('music-bar').style.display='flex';
+    if(ytReady){
+        ytPlayer.playVideo();
+    } else {
+        pendingPlay=true;
+        // API hiç yüklenmezse (engellendi, yerelden açıldı, internet yoksa vb.)
+        // 6 saniye sonra sessizce takılı kalmak yerine yedek mesajı göster
+        setTimeout(()=>{ if(!ytReady) showMusicFallback(); }, 6000);
+    }
 }
 function skipMusic(){hideMusicModal();}
 
