@@ -207,6 +207,7 @@ h1{
   <div class="question-bubble">
     Çıkma tarihimiz ne, prenses? 💌
   </div>
+  <!-- DOĞRU CEVAP: 28 Nisan 2026 ve türevleri -->
 
   <div class="input-wrap">
     <input type="text" id="pwInput" placeholder="cevabını yaz..." autocomplete="off" autocorrect="off" spellcheck="false">
@@ -268,12 +269,25 @@ h1{
 })();
 
 /* ── Şifre sistemi ── */
+// DOĞRU CEVAP: 28 Nisan 2026 (ve her türlü yazım biçimi)
 const ANSWERS=[
-  '10 temmuz 2001','10temmuz2001','10 temmuz','temmuz 10 2001',
-  '10.07.2001','10/07/2001','10-07-2001',
-  '07/10/2001','10 07 2001','10072001',
-  '10 temmuz 2001.','10 temmuz 2001!',
-  'temmuz 10','10.temmuz.2001','10 temmuz, 2001'
+  '28 nisan 2026','28nisan2026','nisan 28 2026',
+  '28.04.2026','28/04/2026','28-04-2026',
+  '04/28/2026','28 04 2026','28042026',
+  '28 nisan','nisan 28','28 nisan 2026.',
+  '28.nisan.2026','28 nisan, 2026',
+  '28/4/2026','28.4.2026'
+];
+
+const WRONG_MSGS=[
+  'Hmm... Yanlış gibi, düşün biraz 🤔',
+  'Bu sefer de değil... İpucu: çıkma tarihi 😅',
+  'Son hakkın! Çok düşünme, bunu biliyorsun 💙'
+];
+const HINT_MSGS=[
+  '',
+  'İpucu: sadece gün ve ay yeterli bile 😉',
+  'İpucu: "28 nisan" yazmayı dene 🥺'
 ];
 
 let tries=0;
@@ -281,21 +295,10 @@ const MAX=3;
 const input=document.getElementById('pwInput');
 const msgEl=document.getElementById('msgEl');
 
-const WRONG_MSGS=[
-  'Hmm... Yanlış gibi, düşün biraz 🤔',
-  'Bu sefer de değil sanırım... İpucu: tarih 😅',
-  'Son hakkın! Çok düşünme, basit bir şey bu 💙'
-];
-const HINT_MSGS=[
-  '',
-  'İpucu: sadece gün ve ay yeterli bile 😉',
-  'İpucu: "10 temmuz" yazmayı dene 🥺'
-];
-
 function normalize(s){
   return s.toLowerCase()
-    .replace(/[İ]/g,'i').replace(/[Ş]/g,'ş').replace(/[Ğ]/g,'ğ')
-    .replace(/[Ç]/g,'ç').replace(/[Ü]/g,'ü').replace(/[Ö]/g,'ö')
+    .replace(/İ/g,'i').replace(/Ş/g,'ş').replace(/Ğ/g,'ğ')
+    .replace(/Ç/g,'ç').replace(/Ü/g,'ü').replace(/Ö/g,'ö')
     .trim().replace(/\s+/g,' ');
 }
 
@@ -303,8 +306,12 @@ function checkPw(){
   const val=normalize(input.value);
   if(!val){shake();return;}
 
-  // Geçerli mi?
-  const ok=ANSWERS.some(a=>val===normalize(a)) || val.includes('10 temmuz') || val.includes('temmuz 10');
+  // 28 nisan içeriyorsa veya tam eşleşme listesindeyse geçer
+  const ok=ANSWERS.some(a=>val===normalize(a))
+         || val.includes('28 nisan')
+         || val.includes('nisan 28')
+         || val.includes('28.04')
+         || val.includes('28/04');
 
   if(ok){
     input.classList.add('success');
@@ -314,8 +321,9 @@ function checkPw(){
     msgEl.textContent='Doğru! Hoş geldin prenses... 🌟';
     // Küçük konfeti patlaması
     burst(40);
-    // Girişi kaydet
-    sessionStorage.setItem('sara_giris','1');
+    // Girişi kaydet — localStorage kullan (GitHub Pages'te sessionStorage sayfa geçişlerinde sıfırlanabilir)
+    // 8 saatlik oturum
+    localStorage.setItem('sara_giris', Date.now().toString());
     // 1.8 saniye sonra geçiş
     setTimeout(()=>{
       const ov=document.getElementById('soOverlay');
@@ -334,7 +342,7 @@ function checkPw(){
 
   msgEl.className='msg';
   if(tries>=MAX){
-    msgEl.textContent='Bak, "10 temmuz" dene yeter 😂 Biliyordun zaten!';
+    msgEl.textContent='Bak, "28 nisan" dene yeter 😂 Biliyordun zaten!';
     input.value='';
     // Üç hatadan sonra yine de ipucu ver ama kilidi açma
     pulseDot(tries-1);
