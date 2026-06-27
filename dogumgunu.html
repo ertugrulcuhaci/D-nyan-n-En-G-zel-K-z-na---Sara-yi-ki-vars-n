@@ -88,76 +88,29 @@
         .home-link:hover{color:var(--sky);}
 
         /* ──── MÜZİK MODAL ──── */
-        #music-modal {
-            position:fixed;inset:0;z-index:300;
-            background:rgba(10,22,40,.92);backdrop-filter:blur(22px);
-            display:none;align-items:center;justify-content:center;
+        /* ── Şarkımız kartı ── */
+        .song-card {
+            display:flex;align-items:center;gap:14px;
+            background:rgba(255,107,138,.08);border:1px solid rgba(255,107,138,.2);
+            border-radius:18px;padding:14px 16px;margin-bottom:18px;
+            cursor:pointer;transition:.25s;text-decoration:none;color:inherit;
         }
-        #music-modal.active { display:flex; }
-        .m-box {
-            background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
-            border-radius:28px;padding:44px 38px;text-align:center;max-width:340px;width:90%;
-            backdrop-filter:blur(24px);box-shadow:0 30px 70px rgba(0,0,0,.6);
-            opacity:0;transform:translateY(28px) scale(.97);
-            transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1);
-        }
-        #music-modal.active .m-box{opacity:1;transform:translateY(0) scale(1);}
-        /* Vinyl */
-        .vinyl {
-            width:82px;height:82px;border-radius:50%;margin:0 auto 22px;
-            background:conic-gradient(#1a1a3a 0deg,#2e2e60 90deg,#1a1a3a 180deg,#2e2e60 270deg,#1a1a3a 360deg);
-            position:relative;box-shadow:0 6px 22px rgba(0,0,0,.55),0 0 0 2px rgba(255,255,255,.06);
-            animation:vinylSpin 2.8s linear infinite;
+        .song-card:hover{background:rgba(255,107,138,.15);border-color:rgba(255,107,138,.4);transform:translateY(-2px);}
+        .song-vinyl{
+            width:44px;height:44px;border-radius:50%;flex-shrink:0;
+            background:conic-gradient(#1a1a3a 0deg,#2e2e60 90deg,#1a1a3a 180deg,#2e2e60 270deg);
+            position:relative;box-shadow:0 4px 14px rgba(0,0,0,.4);
+            animation:vinylSpin 3s linear infinite;
         }
         @keyframes vinylSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-        .vinyl::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#444,#111);border:2px solid rgba(255,255,255,.15);}
-        .vinyl-lines{position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(255,255,255,.06);}
-        .m-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;font-weight:600;color:var(--mist);margin-bottom:8px;}
-        .m-sub{font-size:12px;color:rgba(200,232,248,.5);margin-bottom:30px;line-height:1.7;}
-        .m-btns{display:flex;flex-direction:column;gap:10px;}
-        .m-btn{padding:13px 24px;border:none;border-radius:30px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:#fff;transition:.2s;}
-        .m-btn.yes{background:linear-gradient(135deg,var(--ember),var(--honey));box-shadow:0 8px 22px rgba(255,107,138,.35);}
-        .m-btn.yes:hover{transform:scale(1.04);box-shadow:0 10px 28px rgba(255,107,138,.5);}
-        .m-btn.no{background:transparent;border:1.5px solid rgba(200,232,248,.18);color:rgba(200,232,248,.5);font-size:12px;padding:9px;}
-        .m-btn.no:hover{border-color:rgba(200,232,248,.4);color:rgba(200,232,248,.8);}
-
-        /* ──── YÜZEN MÜZİK ÇUBUĞU ──── */
-        #music-bar {
-            display:none;position:fixed;bottom:20px;left:20px;z-index:100;
-            background:rgba(12,24,46,.93);border:1px solid rgba(255,255,255,.12);
-            border-radius:50px;padding:9px 14px 9px 11px;
-            backdrop-filter:blur(22px);box-shadow:0 8px 30px rgba(0,0,0,.45);
-            align-items:center;gap:10px;cursor:pointer;max-width:210px;
-            transition:border-color .25s,box-shadow .25s;
-        }
-        #music-bar:hover{border-color:rgba(255,107,138,.35);box-shadow:0 10px 36px rgba(0,0,0,.5),0 0 18px rgba(255,107,138,.12);}
-        .m-vinyl-sm{width:32px;height:32px;border-radius:50%;flex-shrink:0;
-            background:conic-gradient(#1a1a3a 0deg,#2e2e60 90deg,#1a1a3a 180deg,#2e2e60 270deg,#1a1a3a 360deg);
-            position:relative;animation:vinylSpin 3s linear infinite;
-            box-shadow:0 2px 8px rgba(0,0,0,.4);}
-        .m-vinyl-sm::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:#222;border:1.5px solid rgba(255,255,255,.15);}
-        .m-vinyl-sm.paused{animation-play-state:paused;}
-        .m-info{flex:1;overflow:hidden;min-width:0;}
-        .m-name{font-size:11px;font-weight:600;color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .m-status{font-size:9px;color:rgba(200,232,248,.42);letter-spacing:1.5px;text-transform:uppercase;}
-        .m-toggle{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,107,138,.3);background:rgba(255,107,138,.2);color:#fff;font-size:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;}
-        .m-toggle:hover{background:rgba(255,107,138,.4);}
-
-        /* ──── MÜZİK YEDEK MESAJI (embed çalışmazsa) ──── */
-        #music-fallback{
-            display:none;position:fixed;bottom:20px;left:20px;z-index:100;max-width:230px;
-            background:rgba(12,24,46,.93);border:1px solid rgba(255,107,138,.3);border-radius:20px;
-            padding:13px 16px;backdrop-filter:blur(22px);box-shadow:0 8px 30px rgba(0,0,0,.45);
-            font-size:12px;color:rgba(200,232,248,.85);line-height:1.6;
-        }
-        #music-fallback a{color:var(--ember);font-weight:600;text-decoration:none;}
-        #music-fallback a:hover{text-decoration:underline;}
-
-        /* Hidden YouTube container */
-        #yt-player{position:fixed;left:-4px;bottom:-4px;width:4px;height:4px;opacity:0;pointer-events:none;overflow:hidden;}
+        .song-vinyl::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#222;border:1.5px solid rgba(255,255,255,.2);}
+        .song-info{flex:1;text-align:left;}
+        .song-name{font-size:13px;font-weight:600;color:var(--mist);margin-bottom:2px;}
+        .song-sub{font-size:10px;color:rgba(200,232,248,.4);letter-spacing:1px;text-transform:uppercase;}
+        .song-play{font-size:20px;flex-shrink:0;}
 
         @media(max-width:400px){.card{padding:32px 22px 30px;}.t-num{font-size:18px;}}
-        @media(prefers-reduced-motion:reduce){.card,.shoot,.vinyl,.m-vinyl-sm{animation:none;}.card{opacity:1;}}
+        @media(prefers-reduced-motion:reduce){.card,.shoot,.song-vinyl{animation:none;}.card{opacity:1;}.song-vinyl{animation:none;}}
     </style>
 </head>
 <body>
@@ -173,40 +126,6 @@
 <div class="shoot"></div>
 <div class="shoot"></div>
 
-<!-- ── Müzik Modal ── -->
-<div id="music-modal">
-    <div class="m-box">
-        <div class="vinyl">
-            <div class="vinyl-lines"></div>
-            <div class="vinyl-lines" style="inset:16px;"></div>
-        </div>
-        <h2 class="m-title">Sana Özel Bir Şarkı</h2>
-        <p class="m-sub" id="m-sub-text">Bu anı müzikle daha güzel kılalım mı?<br>Seni düşünerek seçtim... 🎵</p>
-        <div class="m-btns">
-            <button class="m-btn yes" onclick="startMusic()">🎶 Müziği Aç</button>
-            <button class="m-btn no" onclick="skipMusic()">Sessiz devam et</button>
-        </div>
-    </div>
-</div>
-
-<!-- Hidden YouTube player -->
-<div id="yt-player"></div>
-
-<!-- ── Yüzen Müzik Çubuğu ── -->
-<div id="music-bar" onclick="toggleMusic()">
-    <div class="m-vinyl-sm" id="m-vinyl-sm"></div>
-    <div class="m-info">
-        <p class="m-name" id="m-name">Yükleniyor...</p>
-        <p class="m-status" id="m-status">Çalıyor</p>
-    </div>
-    <button class="m-toggle" id="m-toggle" onclick="event.stopPropagation();toggleMusic()">⏸</button>
-</div>
-
-<!-- ── Müzik çalışmazsa gösterilecek yedek kutu ── -->
-<div id="music-fallback">
-    🎵 Şarkı bu cihazda/bağlantıda açılamadı.<br>
-    <a href="https://www.youtube.com/watch?v=Fi15jicjMLc" target="_blank" rel="noopener">YouTube'da dinle →</a>
-</div>
 
 <div class="card">
     <div class="top-line"></div>
@@ -224,6 +143,16 @@
             <div class="t-box" id="tb-s"><span class="t-num" id="ts">00</span><span class="t-lbl" id="tl-s">Sn</span></div>
         </div>
     </div>
+
+    <!-- Şarkımız kartı — YouTube'u yeni sekmede açar, embed yok -->
+    <a class="song-card" href="https://www.youtube.com/watch?v=Fi15jicjMLc" target="_blank" rel="noopener" title="Şarkımızı dinle">
+        <div class="song-vinyl"></div>
+        <div class="song-info">
+            <p class="song-name">Şarkımız 🎵</p>
+            <p class="song-sub">Dinlemek için dokun</p>
+        </div>
+        <span class="song-play">▶️</span>
+    </a>
 
     <div class="btn-stack">
         <button class="btn btn-bday"  onclick="location.href='hediye.html'">🎁 &nbsp;Hediyeni Aç</button>
@@ -288,91 +217,6 @@ function tick(){
     ['tl-d','tl-h','tl-m','tl-s'].forEach((id,i)=>document.getElementById(id).textContent=['Gün','Saat','Dk','Sn'][i]);
 }
 setInterval(tick,1000);tick();
-
-/* ──── MÜZİK SİSTEMİ ──── */
-// Dosya bilgisayarda yerel olarak (file://) açıldıysa müzik büyük ihtimalle çalışmaz —
-// kullanıcıyı bilgilendiriyoruz, ama yine de denemeye çalışıyoruz.
-if (location.protocol === 'file:') {
-    document.getElementById('m-sub-text').innerHTML =
-        "Bu anı müzikle daha güzel kılalım mı?<br>" +
-        "<span style='color:rgba(255,107,138,.8)'>Not: Dosyayı yerelden açtığın için müzik burada çalışmayabilir — site GitHub Pages'te yayınlandığında sorunsuz çalışacak.</span>";
-}
-
-var ytTag=document.createElement('script');
-ytTag.src='https://www.youtube.com/iframe_api';
-document.head.appendChild(ytTag);
-
-var ytPlayer,ytReady=false,pendingPlay=false,isPlaying=false,musicFailed=false;
-
-window.onYouTubeIframeAPIReady=function(){
-    ytPlayer=new YT.Player('yt-player',{
-        videoId:'Fi15jicjMLc',
-        playerVars:{autoplay:0,controls:0,loop:1,playlist:'Fi15jicjMLc',rel:0,disablekb:1},
-        events:{
-            onReady:function(e){
-                ytReady=true;
-                e.target.setVolume(38);
-                const data=e.target.getVideoData();
-                if(data&&data.title) document.getElementById('m-name').textContent=data.title;
-                if(pendingPlay){e.target.playVideo();pendingPlay=false;}
-            },
-            onStateChange:function(e){
-                isPlaying=(e.data===1);
-                updateMusicUI();
-            },
-            onError:function(){
-                // Video oynatılamıyorsa (engelli/silinmiş/vb.) yedek mesajı göster
-                showMusicFallback();
-            }
-        }
-    });
-};
-
-function showMusicFallback(){
-    if(musicFailed) return;
-    musicFailed=true;
-    document.getElementById('music-bar').style.display='none';
-    document.getElementById('music-fallback').style.display='block';
-}
-
-function startMusic(){
-    hideMusicModal();
-    document.getElementById('music-bar').style.display='flex';
-    if(ytReady){
-        ytPlayer.playVideo();
-    } else {
-        pendingPlay=true;
-        // API hiç yüklenmezse (engellendi, yerelden açıldı, internet yoksa vb.)
-        // 6 saniye sonra sessizce takılı kalmak yerine yedek mesajı göster
-        setTimeout(()=>{ if(!ytReady) showMusicFallback(); }, 6000);
-    }
-}
-function skipMusic(){hideMusicModal();}
-
-function toggleMusic(){
-    if(!ytPlayer||!ytReady)return;
-    const state=ytPlayer.getPlayerState();
-    if(state===1){ytPlayer.pauseVideo();}else{ytPlayer.playVideo();}
-}
-
-function updateMusicUI(){
-    document.getElementById('m-toggle').textContent=isPlaying?'⏸':'▶';
-    document.getElementById('m-status').textContent=isPlaying?'Çalıyor':'Duraklatıldı';
-    document.getElementById('m-vinyl-sm').classList.toggle('paused',!isPlaying);
-}
-
-function hideMusicModal(){
-    const m=document.getElementById('music-modal');
-    m.querySelector('.m-box').style.opacity='0';
-    m.querySelector('.m-box').style.transform='translateY(20px) scale(.97)';
-    setTimeout(()=>{m.classList.remove('active');},500);
-}
-
-// Sayfa yüklendikten 1.2s sonra müzik modalını göster
-setTimeout(()=>{
-    const m=document.getElementById('music-modal');
-    m.classList.add('active');
-},1200);
 </script>
 </body>
 </html>
