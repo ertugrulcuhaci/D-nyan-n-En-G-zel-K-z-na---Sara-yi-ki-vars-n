@@ -244,13 +244,15 @@
 
 <script>
 /* ── Giriş kontrolü ── */
-// giris.html üzerinden gelmediyse oraya yönlendir
-if(!sessionStorage.getItem('sara_giris')){
-  // Geliştirme kolaylığı için: URL'de ?dev varsa atla
-  if(!location.search.includes('dev')){
+// localStorage kullan — GitHub Pages'te sessionStorage sayfa geçişlerinde sıfırlanıyor
+(function(){
+  const ts = localStorage.getItem('sara_giris');
+  const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+  const valid = ts && (Date.now() - parseInt(ts)) < EIGHT_HOURS;
+  if(!valid && !location.search.includes('dev')){
     location.replace('giris.html');
   }
-}
+})();
 
 /* ── Star canvas ── */
 (function () {
