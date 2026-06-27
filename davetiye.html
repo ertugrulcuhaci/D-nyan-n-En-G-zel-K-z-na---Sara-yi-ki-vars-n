@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sana Özel Bir Davet 💌</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            color: #fff; overflow: hidden;
+        }
+
+        /* VIP Bilet Tasarımı */
+        .ticket {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 2px solid #d4af37; /* Altın sarısı çerçeve */
+            border-radius: 20px;
+            padding: 40px;
+            width: 85%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+            position: relative;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Bilet Kesik Efektleri */
+        .ticket::before, .ticket::after {
+            content: ''; position: absolute; top: 50%; width: 40px; height: 40px;
+            background: #203a43; border-radius: 50%; transform: translateY(-50%);
+        }
+        .ticket::before { left: -22px; border-right: 2px solid #d4af37; }
+        .ticket::after { right: -22px; border-left: 2px solid #d4af37; }
+
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3rem; color: #d4af37; margin: 0 0 10px 0; }
+        h2 { font-size: 1.2rem; font-weight: 400; letter-spacing: 2px; margin-bottom: 30px; border-bottom: 1px dashed #d4af37; padding-bottom: 10px; }
+        
+        p { font-size: 0.95rem; line-height: 1.6; color: #e0f7fa; margin-bottom: 20px; }
+        
+        .chef-note {
+            background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px;
+            font-size: 0.85rem; font-style: italic; border-left: 3px solid #d4af37;
+            text-align: left;
+        }
+
+        .btn-accept {
+            margin-top: 30px; padding: 15px 40px; background: #d4af37; color: #0f2027;
+            border: none; border-radius: 50px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: 0.3s; width: 100%;
+        }
+        .btn-accept:hover { background: #f1c40f; transform: scale(1.05); box-shadow: 0 0 20px rgba(241, 196, 15, 0.4); }
+
+    </style>
+</head>
+<body>
+
+    <div class="ticket" id="ticketBox">
+        <h1>VIP Davetiye</h1>
+        <h2>Şefin Özel Masasına</h2>
+        
+        <p>Benim güzel prensesim,<br><br>
+        Seni, özenle (baya uğraştım bak) hazırlanmış, mum ışığında geçecek çok özel bir 'fine-dining' akşamına davet ediyorum.</p>
+        
+        <div class="chef-note">
+            🌟 <strong>Şefin Notu:</strong> Menü tamamen senin narin damak zevkine göre hazırlandı. Soğan, sarımsak veya mantar gibi detaylar mutfağımızın kapısından bile geçmedi.
+        </div>
+
+        <button class="btn-accept" onclick="acceptInvite()">Daveti Kabul Et 🥂</button>
+    </div>
+
+    <script>
+        function acceptInvite() {
+            const ticket = document.getElementById('ticketBox');
+            ticket.style.opacity = '0';
+            ticket.style.transition = '0.5s';
+            
+            setTimeout(() => {
+                ticket.innerHTML = `
+                    <h1 style="font-size: 4rem;">🥂</h1>
+                    <h2 style="border:none;">Masan Hazır!</h2>
+                    <p style="font-size: 1.1rem;">Rezervasyonun onaylandı. O gece seni dünyanın en mutlu kadını yapmak için bekliyor olacağım.</p>
+                `;
+                ticket.style.opacity = '1';
+            }, 500);
+        }
+    </script>
+</body>
+</html>
