@@ -3,135 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oyun Odası 🎮</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.85em%22 font-size=%2290%22>💙</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Oyun Odamız 🎮</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;0,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --night-deep: #102844;
-        --night-mid: #1B3F73;
-        --blue-primary: #2C6FBD;
-        --blue-light: #8ECDF0;
-        --blue-pale: #EAF4FC;
-        --gold: #F4C95D;
-        --glass: rgba(255,255,255,0.06);
-        --glass-border: rgba(255,255,255,0.16);
+        --ink:#0A1628; --deep:#112240; --mid:#1C3A64;
+        --azure:#2D6FBD; --sky:#6BB8E8; --mist:#C8E8F8; --parchment:#EBF5FD;
+        --ember:#FF6B8A; --honey:#F5C957;
+        --frost:rgba(255,255,255,0.06); --rim:rgba(255,255,255,0.12);
     }
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-        margin: 0; font-family: 'Poppins', sans-serif; text-align: center;
-        background: linear-gradient(160deg, var(--night-mid) 0%, var(--night-deep) 100%);
-        color: var(--blue-pale); min-height: 100vh; position: relative; overflow-x: hidden;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        padding: 20px; box-sizing: border-box;
-        opacity: 0; transition: opacity 0.4s ease;
+        font-family: 'Poppins', sans-serif;
+        background: var(--ink); color: var(--parchment);
+        min-height: 100vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 32px 16px 48px; overflow-x: hidden; position: relative;
     }
-    body.loaded { opacity: 1; }
+    canvas#cv { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-    #stars { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
-    .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.2; animation: twinkle 3s ease-in-out infinite; }
-    @keyframes twinkle { 0%, 100% { opacity: .12; } 50% { opacity: .8; } }
-
+    .page-header { position: relative; z-index: 1; text-align: center; margin-bottom: 36px; }
+    .eyebrow { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(200,232,248,.4); margin-bottom: 10px; }
     h1 {
-        font-family: 'Great Vibes', cursive; font-size: clamp(34px, 8vw, 50px);
-        margin-bottom: 10px;
-        background: linear-gradient(90deg, var(--gold), var(--blue-light));
+        font-family: 'Cormorant Garamond', serif; font-size: clamp(32px,8vw,52px);
+        font-style: italic; font-weight: 600; line-height: 1;
+        background: linear-gradient(135deg, var(--honey), var(--sky));
         -webkit-background-clip: text; background-clip: text; color: transparent;
+        margin-bottom: 8px;
     }
-    p.subtitle { font-size: 15px; color: rgba(234,244,252,0.65); margin-bottom: 40px; }
+    .sub { font-size: 13px; font-weight: 300; color: rgba(200,232,248,.5); }
 
-    .game-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 1000px; }
+    /* Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; max-width: 920px; width: 100%; position: relative; z-index: 1; }
 
-    .game-card {
-        background: var(--glass); border-radius: 20px; padding: 25px; width: 260px;
-        backdrop-filter: blur(14px); border: 1px solid var(--glass-border);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.35), 0 0 25px rgba(44,111,189,0.12);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit;
-        opacity: 0; animation: cardIn 0.6s ease forwards;
+    .card {
+        background: var(--frost); border: 1px solid var(--rim);
+        border-radius: 22px; padding: 28px 22px 22px;
+        display: flex; flex-direction: column; align-items: center;
+        text-decoration: none; color: inherit;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 16px 40px rgba(0,0,0,.35);
+        transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s, border-color .28s;
+        opacity: 0; animation: fadeUp .5s ease forwards;
     }
-    .game-card:nth-child(1) { animation-delay: .1s; }
-    .game-card:nth-child(2) { animation-delay: .25s; }
-    .game-card:nth-child(3) { animation-delay: .4s; }
-    @keyframes cardIn { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+    .card:nth-child(1) { animation-delay: .08s; }
+    .card:nth-child(2) { animation-delay: .18s; }
+    .card:nth-child(3) { animation-delay: .28s; }
+    .card:nth-child(4) { animation-delay: .38s; }
+    .card:nth-child(5) { animation-delay: .48s; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(107,184,232,.15); }
 
-    .game-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 25px 45px rgba(0,0,0,0.4), 0 0 35px rgba(44,111,189,0.3);
+    .card-icon {
+        width: 64px; height: 64px; border-radius: 18px; margin-bottom: 16px;
+        display: flex; align-items: center; justify-content: center; font-size: 30px;
+        background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
     }
-    .game-icon { font-size: 50px; margin-bottom: 15px; }
-    .game-card h3 { margin: 0 0 10px 0; color: var(--blue-light); font-size: 22px; }
-    .game-card p { font-size: 14px; color: rgba(234,244,252,0.75); margin: 0 0 20px 0; line-height: 1.4; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--sky); margin-bottom: 7px; text-align: center; }
+    .card-desc { font-size: 12px; color: rgba(200,232,248,.65); line-height: 1.5; text-align: center; margin-bottom: 18px; flex: 1; }
 
     .play-btn {
-        padding: 10px 25px; font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif;
-        border: none; border-radius: 50px; cursor: pointer; color: white;
-        background: linear-gradient(45deg, var(--blue-primary), var(--blue-light)); width: 100%; transition: 0.3s;
+        width: 100%; padding: 10px; border: none; border-radius: 30px;
+        font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
+        cursor: pointer; color: #fff; letter-spacing: .2px;
+        transition: filter .2s, transform .15s;
     }
-    .game-card:hover .play-btn { box-shadow: 0 5px 18px rgba(142,205,240,0.5); }
+    .play-btn:hover { filter: brightness(1.12); }
+    .play-btn:active { transform: scale(.97); }
+    .play-btn.blue  { background: linear-gradient(135deg, var(--azure), var(--sky)); }
+    .play-btn.rose  { background: linear-gradient(135deg, var(--ember), var(--honey)); }
+    .play-btn.green { background: linear-gradient(135deg, #2fb57a, #58d6a0); }
+    .play-btn.purple{ background: linear-gradient(135deg, #7c5cbf, #b08ee0); }
+    .play-btn.teal  { background: linear-gradient(135deg, #1a8fa0, #42cad4); }
 
-    .back-btn {
-        margin-top: 40px; padding: 10px 20px; background: transparent; border: 2px solid var(--blue-light);
-        color: var(--blue-light); border-radius: 50px; font-family: 'Poppins', sans-serif; font-weight: 600;
-        cursor: pointer; transition: 0.3s;
+    /* Mızmız kartı hafif pembe ton */
+    .card.miz { border-color: rgba(255,107,138,.18); }
+    .card.miz:hover { border-color: rgba(255,107,138,.35); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(255,107,138,.18); }
+
+    /* Yeni: Sevgi notu kartı */
+    .card.note { border-color: rgba(245,201,87,.18); }
+    .card.note:hover { border-color: rgba(245,201,87,.35); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(245,201,87,.18); }
+
+    .back {
+        position: relative; z-index: 1; margin-top: 30px;
+        padding: 10px 26px; border: 1.5px solid rgba(107,184,232,.4);
+        background: transparent; color: var(--sky); border-radius: 30px;
+        font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px;
+        cursor: pointer; transition: .25s;
     }
-    .back-btn:hover { background: var(--blue-light); color: var(--night-deep); }
-    @media (prefers-reduced-motion: reduce) { .star, .game-card { animation: none; opacity: 1; } }
+    .back:hover { background: var(--sky); color: var(--ink); }
+
+    @media (max-width: 500px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 340px) { .grid { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { .card { animation: none; opacity: 1; } }
 </style>
 </head>
 <body>
-    <div id="stars"></div>
+<canvas id="cv"></canvas>
 
+<header class="page-header">
+    <p class="eyebrow">Sadece ikimiz için</p>
     <h1>Oyun Odamız</h1>
-    <p class="subtitle">Birlikte eğlenmek için bir macera seç 💙</p>
-    <div class="game-container">
+    <p class="sub">Bir macera seç, başlayalım 💙</p>
+</header>
 
-        <a href="hafiza.html" class="game-card" onclick="goTo(event,'hafiza.html')">
-            <div class="game-icon">🧩</div>
-            <h3>Anı Eşleştirme</h3>
-            <p>En güzel fotoğraflarımızı hafızanda tutabilir misin?</p>
-            <button class="play-btn">Oyna</button>
-        </a>
-        <a href="masal.html" class="game-card" onclick="goTo(event,'masal.html')">
-            <div class="game-icon">📖</div>
-            <h3>Turluk Masalı</h3>
-            <p>Kendi seçimlerinle hikayemizin gidişatını sen belirle.</p>
-            <button class="play-btn">Oku & Seç</button>
-        </a>
-        <a href="kosu.html" class="game-card" onclick="goTo(event,'kosu.html')">
-            <div class="game-icon">🏃‍♂️</div>
-            <h3>Sonsuz Aşk Koşusu</h3>
-            <p>Engelleri aş ve bana ulaşmak için kalpleri topla!</p>
-            <button class="play-btn">Başla</button>
-        </a>
-    </div>
-    <button class="back-btn" onclick="goTo(event,'index.html')">Geri Dön</button>
+<div class="grid">
+
+    <a href="hafiza.html" class="card">
+        <div class="card-icon">🧩</div>
+        <h3 class="card-title">Anı Eşleştirme</h3>
+        <p class="card-desc">En güzel anlarımızı ne kadar iyi hatırlıyorsun? Kartları çevir, eşleştir.</p>
+        <button class="play-btn blue">Oyna</button>
+    </a>
+
+    <a href="masal.html" class="card">
+        <div class="card-icon">📖</div>
+        <h3 class="card-title">Turluk Masalı</h3>
+        <p class="card-desc">Kendi seçimlerinle hikayemizin gidişatını belirle. Her sayfa bir sürpriz.</p>
+        <button class="play-btn teal">Oku & Seç</button>
+    </a>
+
+    <a href="kosu.html" class="card">
+        <div class="card-icon">🏃‍♂️</div>
+        <h3 class="card-title">Sonsuz Aşk Koşusu</h3>
+        <p class="card-desc">Engelleri aş, zıpla — ve sonunda bana ulaş! Kaç tur dayanabilirsin?</p>
+        <button class="play-btn green">Başla</button>
+    </a>
+
+    <a href="not.html" class="card note">
+        <div class="card-icon">💌</div>
+        <h3 class="card-title">Sevgi Notu</h3>
+        <p class="card-desc">Bugün sana bir şey yazmak istedim. Açmak için hazır mısın?</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#F5C957,#FF9AC3);">Aç 💛</button>
+    </a>
+
+    <a href="mizmiz.html" class="card miz">
+        <div class="card-icon">😤</div>
+        <h3 class="card-title">Mızmızlık Köşesi</h3>
+        <p class="card-desc">Şikayetlerini buraya bırak. Belki işe yarar... belki de güleriz.</p>
+        <button class="play-btn rose">Şikayet Et 😏</button>
+    </a>
+
+    <a href="kahve.html" class="card" style="border-color:rgba(160,82,45,.25);">
+        <div class="card-icon" style="background:rgba(92,51,23,.25);border-color:rgba(160,82,45,.2);">☕</div>
+        <h3 class="card-title" style="color:#D2956A;">Kahve Köşen</h3>
+        <p class="card-desc">Bağımlılığına özel bir köşe. Sürpriz var içinde 🤫</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#5C3317,#A0522D);">Hadi Bir Yudum ☕</button>
+    </a>
+
+    <a href="davetiye.html" class="card" style="border-color:rgba(212,175,55,.22);">
+        <div class="card-icon" style="background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.18);">🥂</div>
+        <h3 class="card-title" style="color:#D4AF37;">VIP Davetiye</h3>
+        <p class="card-desc">Sana özel bir davetim var. Aç bakalım, ne yazıyor...</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#b8860b,#D4AF37);color:#0A1628;">Aç 🎁</button>
+    </a>
+
+</div>
+
+<button class="back" onclick="location.href='index.html'">← Geri Dön</button>
 
 <script>
-    function goTo(e, url) {
-        if (e) e.preventDefault();
-        document.body.classList.remove('loaded');
-        setTimeout(() => { window.location.href = url; }, 320);
+(function(){
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    let W, H, st = [];
+    function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mk(){ return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.1+.3, a:Math.random(), da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1) }; }
+    function init(){ resize(); st = Array.from({length:80},mk); }
+    function draw(){
+        ctx.clearRect(0,0,W,H);
+        st.forEach(s=>{
+            s.a = Math.max(.05, Math.min(.9, s.a+s.da));
+            if(s.a<=.05||s.a>=.9) s.da*=-1;
+            ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
     }
-    window.addEventListener('DOMContentLoaded', () => {
-        requestAnimationFrame(() => document.body.classList.add('loaded'));
-    });
-
-    (function(){
-        const starsEl = document.getElementById('stars');
-        for (let i = 0; i < 35; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            const size = Math.random() * 2 + 1;
-            s.style.width = size + 'px';
-            s.style.height = size + 'px';
-            s.style.top = Math.random() * 100 + '%';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.animationDelay = (Math.random() * 3) + 's';
-            s.style.animationDuration = (2 + Math.random() * 3) + 's';
-            starsEl.appendChild(s);
-        }
-    })();
+    addEventListener('resize',()=>{ resize(); st=Array.from({length:80},mk); });
+    init(); draw();
+})();
 </script>
 </body>
 </html>
