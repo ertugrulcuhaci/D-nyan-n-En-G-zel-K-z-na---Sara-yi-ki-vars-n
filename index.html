@@ -206,7 +206,79 @@
     <img src="masal5.jpg"><img src="masal6.jpg"><img src="hafiza1.jpg"><img src="hafiza2.jpg">
     <img src="hafiza3.jpg"><img src="hafiza4.jpg"><img src="masal1.jpg"><img src="masal3.jpg">
 </div>
+<div class="fog-wrapper" style="position: relative; width: 320px; height: 400px; margin: 40px auto; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+    
+    <div class="fog-content" style="position: absolute; inset: 0; background: linear-gradient(135deg, #112240, #0A1628); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+        
+        <span style="font-size: 50px; margin-bottom: 10px;">💖</span>
+        <h3 style="font-family: 'Cormorant Garamond', serif; color: #F5C957; font-size: 26px; margin-bottom: 10px;">Seni Seviyorum</h3>
+        <p style="color: #EBF5FD; font-size: 14px; line-height: 1.6;">O puslu günlerin ardında her zaman sen vardın. İyi ki benimlesin...</p>
+    </div>
 
+    <canvas id="fogCanvas" style="position: absolute; inset: 0; cursor: crosshair; z-index: 10;"></canvas>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('fogCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        // Canvas boyutlarını kapsayıcıya göre ayarla
+        function initCanvas() {
+            canvas.width = 320;
+            canvas.height = 400;
+            
+            // Buğulu cam efekti (Yarı saydam beyaz-buz mavisi)
+            ctx.fillStyle = 'rgba(235, 245, 253, 0.96)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Camın üstüne yazı yazalım
+            ctx.font = "italic 18px 'Cormorant Garamond', serif";
+            ctx.fillStyle = "#2D6FBD";
+            ctx.textAlign = "center";
+            ctx.fillText("Camı silmek için dokun...", canvas.width / 2, canvas.height / 2);
+            
+            // Çizim yaparken alttaki katmanı silme modu
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+
+        initCanvas();
+
+        // Fare/Parmak koordinatlarını alma
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        // Silme işlemi
+        function wipe(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // Sayfanın kaymasını engeller
+            const pos = getMousePos(e);
+            
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2); // 25: Silgi boyutu (Büyütürsen daha hızlı silinir)
+            ctx.fill();
+        }
+
+        // Fare Olayları
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; wipe(e); });
+        canvas.addEventListener('mousemove', wipe);
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+        // Dokunmatik Ekran Olayları (Telefonlar için)
+        canvas.addEventListener('touchstart', (e) => { isDrawing = true; wipe(e); }, { passive: false });
+        canvas.addEventListener('touchmove', wipe, { passive: false });
+        canvas.addEventListener('touchend', () => isDrawing = false);
+    })();
+</script>
 <canvas id="canvas"></canvas>
 <div class="shoot"></div>
 <div class="shoot"></div>
