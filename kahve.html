@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kahve Köşesi ☕</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A1628;--deep:#0E1E36;
+  --coffee-dark:#2C1810;--coffee-mid:#5C3317;--coffee-light:#A0522D;
+  --cream:#F5E6D3;--foam:#FFF8F0;
+  --azure:#2D6FBD;--sky:#6BB8E8;--mist:#C8E8F8;--parchment:#EBF5FD;
+  --ember:#FF6B8A;--honey:#F5C957;
+  --frost:rgba(255,255,255,.07);--rim:rgba(255,255,255,.13);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:radial-gradient(ellipse at top,#1a0e06,var(--ink) 70%);
+  color:var(--parchment);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 16px 80px;overflow-x:hidden;position:relative;
+}
+
+/* ── Canvas ── */
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── Kahve parçacıkları (küçük daireler yükseliyor) ── */
+.steam-particle{
+  position:fixed;bottom:-10px;z-index:1;pointer-events:none;
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(160,82,45,.25);
+  animation:steamRise linear infinite;
+}
+@keyframes steamRise{
+  0%{transform:translateY(0) scale(1);opacity:0;}
+  20%{opacity:.5;}
+  80%{opacity:.15;}
+  100%{transform:translateY(-100vh) scale(2.5);opacity:0;}
+}
+
+/* ── Başlık ── */
+.page-head{position:relative;z-index:2;text-align:center;margin-bottom:36px;animation:fadeUp .8s ease both;}
+.eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(160,82,45,.7);margin-bottom:10px;}
+h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(30px,8vw,52px);font-style:italic;font-weight:600;
+  background:linear-gradient(135deg,var(--cream),var(--honey),#D2691E);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:8px;line-height:1.1;
+}
+.sub{font-size:13px;font-weight:300;color:rgba(245,230,211,.5);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── Kahve bardağı SVG ── */
+.cup-wrap{
+  position:relative;z-index:2;margin-bottom:32px;
+  cursor:pointer;
+  animation:cupFloat 3.5s ease-in-out infinite;
+}
+@keyframes cupFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+.cup-svg{width:180px;height:220px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.5)) drop-shadow(0 0 20px rgba(160,82,45,.2));}
+
+/* Buhar animasyonu */
+@keyframes steamWave{
+  0%{d:path('M 0 30 Q 10 15 0 0');opacity:0;transform:translateY(0) scaleX(1);}
+  20%{opacity:.6;}
+  80%{opacity:.2;}
+  100%{d:path('M 0 30 Q -10 15 0 0');opacity:0;transform:translateY(-40px) scaleX(1.3);}
+}
+.steam-path{animation:steamWave ease-in-out infinite;transform-origin:bottom center;}
+.steam-path:nth-child(1){animation-duration:2.2s;animation-delay:0s;}
+.steam-path:nth-child(2){animation-duration:2.8s;animation-delay:.7s;}
+.steam-path:nth-child(3){animation-duration:2.5s;animation-delay:1.4s;}
+
+/* Kahve yüzey dalgası */
+@keyframes coffeeWave{
+  0%,100%{d:path('M 40 0 Q 60 -4 80 0 Q 100 4 120 0');}
+  50%{d:path('M 40 0 Q 60 4 80 0 Q 100 -4 120 0');}
+}
+.coffee-surface{animation:coffeeWave 2s ease-in-out infinite;}
+
+/* ── Latte Art ── */
+.latte-art{opacity:0;transition:opacity 1s ease;}
+.latte-art.show{opacity:1;}
+
+/* ── Tıklama ipucu ── */
+.tap-hint{
+  position:relative;z-index:2;font-size:12px;color:rgba(245,230,211,.4);
+  margin-bottom:32px;letter-spacing:.5px;
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.4;}50%{opacity:.9;};}
+
+/* ── Bilgi kartları ── */
+.cards-row{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px;max-width:520px;width:100%;margin-bottom:28px;
+}
+.info-card{
+  background:rgba(44,24,16,.5);border:1px solid rgba(160,82,45,.25);
+  border-radius:18px;padding:18px 16px;text-align:center;
+  backdrop-filter:blur(14px);
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+}
+.info-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(160,82,45,.5);
+  box-shadow:0 12px 30px rgba(0,0,0,.35),0 0 20px rgba(160,82,45,.12);
+}
+.info-icon{font-size:30px;margin-bottom:8px;display:block;}
+.info-title{font-size:13px;font-weight:600;color:var(--cream);margin-bottom:4px;}
+.info-text{font-size:11px;color:rgba(245,230,211,.55);line-height:1.5;}
+
+/* ── Kahve quiz ── */
+.quiz-box{
+  position:relative;z-index:2;
+  background:rgba(44,24,16,.5);border:1px solid rgba(160,82,45,.25);
+  border-radius:22px;padding:26px 24px;max-width:520px;width:100%;
+  margin-bottom:28px;backdrop-filter:blur(14px);text-align:center;
+}
+.quiz-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(160,82,45,.6);margin-bottom:16px;}
+.quiz-q{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--cream);margin-bottom:18px;line-height:1.4;}
+.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.q-btn{
+  padding:10px 12px;border-radius:12px;border:1px solid rgba(160,82,45,.25);
+  background:rgba(255,255,255,.04);color:rgba(245,230,211,.8);
+  cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;
+  transition:.2s;text-align:center;
+}
+.q-btn:hover{background:rgba(160,82,45,.2);border-color:rgba(160,82,45,.45);}
+.q-btn.correct{background:rgba(47,181,122,.2);border-color:rgba(47,181,122,.5);color:#7dffc8;}
+.q-btn.wrong{background:rgba(255,107,138,.15);border-color:rgba(255,107,138,.4);color:rgba(255,107,138,.8);}
+.quiz-result{font-size:13px;color:rgba(245,230,211,.7);margin-top:14px;min-height:20px;font-style:italic;}
+
+/* ── Sevgi notu ── */
+.love-note{
+  position:relative;z-index:2;
+  background:rgba(44,24,16,.5);border:1px solid rgba(160,82,45,.25);
+  border-radius:22px;padding:28px 26px;max-width:520px;width:100%;
+  margin-bottom:28px;backdrop-filter:blur(14px);
+  font-family:'Cormorant Garamond',serif;
+}
+.note-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.wax{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#A0522D,#D2691E);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 4px 14px rgba(160,82,45,.35);
+}
+.note-to{flex:1;}
+.note-to-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(160,82,45,.55);}
+.note-to-name{font-size:16px;font-style:italic;color:var(--cream);}
+.note-body{font-size:clamp(15px,3.5vw,18px);font-style:italic;font-weight:300;color:rgba(245,230,211,.88);line-height:1.85;}
+.note-body p+p{margin-top:12px;}
+.note-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:rgba(160,82,45,.4);}
+.note-divider::before,.note-divider::after{content:'';flex:1;height:1px;background:rgba(160,82,45,.2);}
+
+/* ── Butonlar ── */
+.btn-row{position:relative;z-index:2;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;}
+.act-btn{
+  padding:12px 26px;border:none;border-radius:28px;
+  font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;color:#fff;transition:.22s;
+}
+.act-btn.coffee{background:linear-gradient(135deg,var(--coffee-mid),var(--coffee-light));box-shadow:0 6px 20px rgba(92,51,23,.45);}
+.act-btn.blue{background:linear-gradient(135deg,var(--azure),var(--sky));box-shadow:0 6px 20px rgba(45,111,189,.4);}
+.act-btn:hover{transform:scale(1.05) translateY(-2px);}
+
+/* ── Popup ── */
+#popup{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(20,10,4,.97);border:1px solid rgba(160,82,45,.3);
+  backdrop-filter:blur(20px);border-radius:22px;
+  padding:20px 24px;max-width:320px;width:90%;text-align:center;
+  z-index:30;box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 24px rgba(160,82,45,.12);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;
+}
+#popup.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+.p-icon{font-size:40px;margin-bottom:10px;display:block;}
+.p-text{font-size:14px;line-height:1.6;color:rgba(245,230,211,.9);}
+.p-close{margin-top:12px;padding:8px 20px;border:none;border-radius:18px;background:rgba(160,82,45,.3);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+
+/* ── Falling coffee emojis ── */
+.fall-item{position:fixed;pointer-events:none;z-index:50;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(110vh) rotate(180deg);opacity:0;}}
+
+@media(prefers-reduced-motion:reduce){.cup-wrap,.steam-particle{animation:none;}}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<!-- Buhar parçacıkları -->
+<script>
+for(let i=0;i<12;i++){
+  const el=document.createElement('div');
+  el.className='steam-particle';
+  el.style.left=Math.random()*100+'vw';
+  const dur=(Math.random()*8+6).toFixed(1);
+  el.style.animationDuration=dur+'s';
+  el.style.animationDelay=(Math.random()*6).toFixed(1)+'s';
+  el.style.width=el.style.height=(Math.random()*8+3)+'px';
+  document.body.appendChild(el);
+}
+</script>
+
+<!-- Başlık -->
+<div class="page-head">
+  <p class="eyebrow">☕ Senin için bir sürpriz</p>
+  <h1>Kahve Köşen</h1>
+  <p class="sub">Çünkü sen olmassan kahve de bir anlam ifade etmez 🤍</p>
+</div>
+
+<!-- Kahve Bardağı SVG -->
+<div class="cup-wrap" id="cupWrap" onclick="tapCup()" title="Tıkla!">
+  <svg class="cup-svg" viewBox="0 0 180 220" xmlns="http://www.w3.org/2000/svg">
+    <!-- Buhar -->
+    <g transform="translate(50,0)">
+      <!-- Buhar 1 -->
+      <path class="steam-path" d="M 20 55 Q 30 40 20 25 Q 10 10 20 0"
+        fill="none" stroke="rgba(245,230,211,0.35)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Buhar 2 -->
+      <path class="steam-path" d="M 40 58 Q 50 42 40 26 Q 30 10 40 0"
+        fill="none" stroke="rgba(245,230,211,0.25)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Buhar 3 -->
+      <path class="steam-path" d="M 60 55 Q 70 38 60 22 Q 50 8 60 0"
+        fill="none" stroke="rgba(245,230,211,0.3)" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Tabak -->
+    <ellipse cx="90" cy="205" rx="68" ry="10" fill="#3d2010" opacity=".7"/>
+    <ellipse cx="90" cy="202" rx="60" ry="8" fill="#5C3317"/>
+    <ellipse cx="90" cy="200" rx="60" ry="8" fill="url(#saucer)"/>
+    <defs>
+      <radialGradient id="saucer" cx="50%" cy="30%">
+        <stop offset="0%" stop-color="#7a4520"/>
+        <stop offset="100%" stop-color="#4a2810"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Kulp -->
+    <path d="M 148 110 Q 172 110 172 135 Q 172 160 148 160"
+      fill="none" stroke="#5C3317" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 148 110 Q 165 110 165 135 Q 165 155 148 160"
+      fill="none" stroke="#7a4520" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Bardak gövde -->
+    <path d="M 32 80 L 42 195 Q 90 205 138 195 L 148 80 Z"
+      fill="url(#cupGrad)"/>
+    <defs>
+      <linearGradient id="cupGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#3d2010"/>
+        <stop offset="30%" stop-color="#6b3820"/>
+        <stop offset="70%" stop-color="#5C3317"/>
+        <stop offset="100%" stop-color="#3d2010"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Bardak üst rim -->
+    <ellipse cx="90" cy="80" rx="58" ry="12" fill="#7a4520"/>
+    <ellipse cx="90" cy="78" rx="58" ry="12" fill="url(#rimGrad)"/>
+    <defs>
+      <linearGradient id="rimGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#a05628"/>
+        <stop offset="100%" stop-color="#6b3820"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Kahve yüzeyi -->
+    <ellipse cx="90" cy="78" rx="54" ry="10" fill="url(#coffeeGrad)"/>
+    <defs>
+      <radialGradient id="coffeeGrad" cx="40%" cy="40%">
+        <stop offset="0%" stop-color="#4a2200"/>
+        <stop offset="60%" stop-color="#2C1810"/>
+        <stop offset="100%" stop-color="#1a0e06"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Latte art (kalp) -->
+    <g class="latte-art" id="latteArt">
+      <!-- Köpük tabanı -->
+      <ellipse cx="90" cy="78" rx="40" ry="7" fill="rgba(255,248,240,0.35)" opacity=".5"/>
+      <!-- Kalp şekli -->
+      <path d="M 90 82 C 90 82 75 72 75 67 C 75 63 78 60 82 61 C 86 62 90 66 90 66 C 90 66 94 62 98 61 C 102 60 105 63 105 67 C 105 72 90 82 90 82 Z"
+        fill="rgba(255,240,220,0.7)" opacity=".8"/>
+      <!-- Fern detail -->
+      <path d="M 90 82 L 90 70" stroke="rgba(120,60,20,.6)" stroke-width="1" fill="none"/>
+      <path d="M 90 76 L 84 71" stroke="rgba(120,60,20,.5)" stroke-width="1" fill="none"/>
+      <path d="M 90 73 L 96 69" stroke="rgba(120,60,20,.5)" stroke-width="1" fill="none"/>
+    </g>
+
+    <!-- Köpük kenar -->
+    <ellipse cx="90" cy="78" rx="54" ry="10" fill="none" stroke="rgba(255,248,240,0.2)" stroke-width="1.5"/>
+
+    <!-- Highlight -->
+    <ellipse cx="68" cy="120" rx="8" ry="20" fill="rgba(255,255,255,.05)" transform="rotate(-15,68,120)"/>
+  </svg>
+</div>
+
+<p class="tap-hint" id="tapHint">👆 Bardağa tıkla</p>
+
+<!-- Bilgi kartları -->
+<div class="cards-row">
+  <div class="info-card">
+    <span class="info-icon">☕</span>
+    <p class="info-title">Günlük Doz</p>
+    <p class="info-text">Kahveni alıyorsan, beni de düşünmüşsündür — ikisi bir arada daha güzel</p>
+  </div>
+  <div class="info-card">
+    <span class="info-icon">🌙</span>
+    <p class="info-title">Gece Kahvesi</p>
+    <p class="info-text">Geç saate kadar uyanık kalmak için değil, seninle konuşmak için içilir</p>
+  </div>
+  <div class="info-card">
+    <span class="info-icon">💛</span>
+    <p class="info-title">Kahven Gibi</p>
+    <p class="info-text">İlk yudumu gibi kalbimi ısıtıyorsun. Her seferinde de aynı his...</p>
+  </div>
+</div>
+
+<!-- Kahve quiz -->
+<div class="quiz-box">
+  <p class="quiz-label">Küçük Kahve Sınavı ☕</p>
+  <p class="quiz-q" id="qqText">Sara'nın en sevdiği kahve hangisi?</p>
+  <div class="quiz-opts" id="qqOpts"></div>
+  <p class="quiz-result" id="qqResult">&nbsp;</p>
+</div>
+
+<!-- Sevgi notu -->
+<div class="love-note">
+  <div class="note-header">
+    <div class="wax">☕</div>
+    <div class="note-to">
+      <p class="note-to-label">Canıma</p>
+      <p class="note-to-name">Emine Sara'ya</p>
+    </div>
+  </div>
+  <div class="note-body">
+    <p>Sabah kahveni elinde tutarken nasıl bir huzur içinde olduğunu görmeyi çok seviyorum. Gözlerin henüz tam açılmamış, ama bardağı ellerin bulmuş bile — bu tam senmişsin.</p>
+    <div class="note-divider">☕</div>
+    <p>Seninle bir kahve içmek, dünyada en güzel şeylerden biri. Bir gün onu birlikte içeceğiz ve o an için can atıyorum. Seni çok seviyorum, canım. 💙</p>
+  </div>
+</div>
+
+<!-- Butonlar -->
+<div class="btn-row">
+  <button class="act-btn coffee" onclick="coffeeRain()">☕ Kahve Yağdır!</button>
+  <button class="act-btn blue" onclick="location.href='oyun.html'">← Oyun Menüsü</button>
+</div>
+
+<!-- Popup -->
+<div id="popup">
+  <span class="p-icon" id="pIcon">☕</span>
+  <p class="p-text" id="pText"></p>
+  <button class="p-close" onclick="closePopup()">Tamam 💙</button>
+</div>
+
+<script>
+/* ── Canvas stars ── */
+(function(){
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  let W,H,st=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  function mk(){return{x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.3,a:Math.random()*.5,da:(Math.random()*.004+.001)*(Math.random()<.5?1:-1)};}
+  function draw(){ctx.clearRect(0,0,W,H);st.forEach(s=>{s.a=Math.max(.02,Math.min(.45,s.a+s.da));if(s.a<=.02||s.a>=.45)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,220,180,${s.a})`;ctx.fill();});requestAnimationFrame(draw);}
+  addEventListener('resize',()=>{resize();st=Array.from({length:60},mk);});
+  resize();st=Array.from({length:60},mk);draw();
+})();
+
+/* ── Bardak tıklama ── */
+let tapped=false;
+function tapCup(){
+  if(tapped)return;
+  tapped=true;
+  document.getElementById('tapHint').style.opacity='0';
+  // Latte art göster
+  document.getElementById('latteArt').classList.add('show');
+  // Mini popup
+  showPopup('💛','Latte art benim sana çizdiğim kalp — fark etmiştin değil mi? ☕');
+  // Küçük konfeti
+  for(let i=0;i<20;i++){
+    const el=document.createElement('div');
+    el.className='fall-item';
+    el.textContent=['☕','💛','✨','🤍'][Math.floor(Math.random()*4)];
+    el.style.left=Math.random()*100+'vw';el.style.top='-20px';
+    el.style.fontSize=(Math.random()*10+12)+'px';
+    const dur=(Math.random()*2+2).toFixed(2);
+    el.style.animationDuration=dur+'s';el.style.animationDelay=(Math.random()*.8).toFixed(2)+'s';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),(parseFloat(dur)+2)*1000);
+  }
+  setTimeout(()=>{tapped=false;},3000);
+}
+
+/* ── Quiz ── */
+const QUESTIONS=[
+  {q:"Sara'nın en sevdiği kahve ne zaman içilir?",opts:["Sabah erkenden","Öğleden sonra","Her fırsatta 😂","Hiç içmez"],correct:2,res:"Tabii ki her fırsatta! Bu konuda tartışmam 😄"},
+  {q:"Kahve mi yoksa sen mi önce gelirsin?",opts:["Kahve","İkisi aynı","Sen tabii ki! 💙","Uyu da geç"],correct:2,res:"Doğru cevap! Ama kahve olmadan biraz zor olur hani 😂"},
+  {q:"İki dakika içinde kahve hazır — ne yaparsın?",opts:["Beklerim sabırla","Acaba yanmış mı diye karıştırırım","Bardağı daha şimdiden tutuyorum","Zamanlayıcı kururum"],correct:2,res:"Kesinlikle bu! Bardak çoktan elde 😂☕"},
+];
+let qIdx=0;
+function buildQuiz(){
+  const q=QUESTIONS[qIdx];
+  document.getElementById('qqText').textContent=q.q;
+  document.getElementById('qqResult').textContent='\u00a0';
+  const opts=document.getElementById('qqOpts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='q-btn';b.textContent=o;
+    b.onclick=()=>answerQ(i,q.correct,q.res,b);
+    opts.appendChild(b);
+  });
+}
+function answerQ(i,correct,res,btn){
+  document.querySelectorAll('.q-btn').forEach(b=>b.onclick=null);
+  btn.classList.add(i===correct?'correct':'wrong');
+  if(i===correct){
+    document.querySelectorAll('.q-btn')[correct].classList.add('correct');
+    document.getElementById('qqResult').textContent='✓ '+res;
+    setTimeout(()=>{qIdx=(qIdx+1)%QUESTIONS.length;buildQuiz();},2200);
+  } else {
+    document.querySelectorAll('.q-btn')[correct].classList.add('correct');
+    document.getElementById('qqResult').textContent='Hmm... Şöyle değil miydi? 😄';
+    setTimeout(()=>{qIdx=(qIdx+1)%QUESTIONS.length;buildQuiz();},2200);
+  }
+}
+buildQuiz();
+
+/* ── Popup ── */
+let pTimer=null;
+function showPopup(icon,text){
+  document.getElementById('pIcon').textContent=icon;
+  document.getElementById('pText').textContent=text;
+  document.getElementById('popup').classList.add('open');
+  if(pTimer)clearTimeout(pTimer);
+  pTimer=setTimeout(closePopup,9000);
+}
+function closePopup(){document.getElementById('popup').classList.remove('open');}
+
+/* ── Kahve yağmuru ── */
+function coffeeRain(){
+  const items=['☕','🤍','💛','✨','🌟','💙','🫖','🍪'];
+  for(let i=0;i<50;i++){
+    const el=document.createElement('div');
+    el.className='fall-item';
+    el.textContent=items[Math.floor(Math.random()*items.length)];
+    el.style.left=Math.random()*100+'vw';el.style.top='-20px';
+    el.style.fontSize=(Math.random()*14+10)+'px';
+    const dur=(Math.random()*3+2.5).toFixed(2);
+    el.style.animationDuration=dur+'s';el.style.animationDelay=(Math.random()*2).toFixed(2)+'s';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),(parseFloat(dur)+3)*1000);
+  }
+}
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşkımızın Zaman Tüneli ⏳</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink:      #0A1628;
+            --deep:     #112240;
+            --azure:    #2D6FBD;
+            --sky:      #6BB8E8;
+            --mist:     #C8E8F8;
+            --parchment:#EBF5FD;
+            --ember:    #FF6B8A;
+            --honey:    #F5C957;
+            --frost:    rgba(255,255,255,0.06);
+            --rim:      rgba(255,255,255,0.13);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif; background: var(--ink); color: var(--parchment);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden; padding: 40px 15px; position: relative;
+        }
+
+        #bg-stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .header { text-align: center; margin-bottom: 40px; position: relative; z-index: 10; }
+        .header h1 { 
+            font-family: 'Cormorant Garamond', serif; font-size: 32px; font-style: italic; 
+            background: linear-gradient(135deg, var(--ember), var(--honey));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 5px;
+        }
+        .header p { font-size: 13px; color: var(--mist); opacity: 0.8; letter-spacing: 1px; }
+
+        /* ── Zaman Tüneli Çizgisi ── */
+        .timeline { position: relative; max-width: 600px; width: 100%; z-index: 10; }
+        .timeline::before { 
+            content: ''; position: absolute; left: 35px; top: 10px; bottom: 0; 
+            width: 2px; background: linear-gradient(to bottom, var(--honey), var(--ember), var(--sky), transparent); 
+            opacity: 0.5;
+        }
+
+        /* ── Kartlar ve Kalpler ── */
+        .milestone { position: relative; margin-bottom: 40px; padding-left: 80px; width: 100%; animation: fadeInUp 0.6s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        
+        /* Animasyon Gecikmeleri (Sırayla gelsinler diye JS ile vereceğiz) */
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        .heart-icon { 
+            position: absolute; left: 16px; top: 0; font-size: 28px; 
+            background: var(--ink); padding: 5px 0; z-index: 2; 
+            text-shadow: 0 0 15px rgba(255,107,138,0.5);
+            animation: pulseHeart 2s infinite alternate;
+        }
+        @keyframes pulseHeart { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        .card { 
+            background: var(--frost); border: 1px solid var(--rim); border-radius: 18px; 
+            padding: 20px; backdrop-filter: blur(10px); box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: rgba(255,107,138,0.3); }
+
+        .card h3 { font-family: 'Cormorant Garamond', serif; color: var(--sky); font-size: 20px; margin-bottom: 6px; }
+        .card p { font-size: 12.5px; opacity: 0.85; margin-bottom: 15px; line-height: 1.5; color: var(--parchment); }
+        
+        /* ── Not Alanı (Textarea) ── */
+        .note-area { display: flex; flex-direction: column; gap: 8px; }
+        .user-note-input {
+            width: 100%; min-height: 60px; padding: 12px; border-radius: 12px;
+            background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.15);
+            color: var(--mist); font-family: 'Poppins', sans-serif; font-size: 13px;
+            resize: vertical; outline: none; transition: 0.2s; font-style: italic;
+        }
+        .user-note-input:focus { border-color: var(--honey); background: rgba(0,0,0,0.4); }
+        .user-note-input::placeholder { color: rgba(200,232,248,0.3); font-style: italic; }
+
+        .action-row { display: flex; justify-content: space-between; align-items: center; }
+        .save-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--honey);
+            padding: 6px 14px; border-radius: 50px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .save-btn:hover { background: rgba(245,201,87,0.15); border-color: var(--honey); }
+        .save-status { font-size: 11px; color: #58D6A0; opacity: 0; transition: opacity 0.3s; }
+
+        .back-btn { 
+            display: inline-block; margin-top: 40px; padding: 12px 30px; border-radius: 50px; 
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s; position: relative; z-index: 10;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.15); }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-stars"></canvas>
+
+<div class="header">
+    <h1>Aşkımızın Kilometre Taşları ⏳</h1>
+    <p>Baştan sona hikayemiz... Kendi hislerini eklemeyi unutma.</p>
+</div>
+
+<div class="timeline" id="timeline">
+    </div>
+
+<a href="index.html" class="back-btn">⬅️ Ana Sayfaya Dön</a>
+
+<script>
+/* ── Güvenlik ── */
+(function(){
+  const ts = localStorage.getItem('sara_giris');
+  const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+  if((!ts || (Date.now() - parseInt(ts)) > EIGHT_HOURS) && !location.search.includes('dev')){
+    location.replace('giris.html');
+  }
+})();
+
+/* ── Arka Plan Yıldızları ── */
+(function () {
+    const cv = document.getElementById('bg-stars'); const ctx = cv.getContext('2d');
+    let W, H, stars = [];
+    function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mkStar() { return { x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + .2, a: Math.random(), da: (Math.random() * .003 + .001) * (Math.random() < .5 ? 1 : -1) }; }
+    function init() { resize(); stars = Array.from({ length: 60 }, mkStar); }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+            s.a = Math.max(.05, Math.min(.95, s.a + s.da)); if (s.a <= .05 || s.a >= .95) s.da *= -1;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize', () => { resize(); stars = Array.from({ length: 60 }, mkStar); });
+    init(); draw();
+})();
+
+/* ── Dopdolu Zaman Tüneli Verileri ── */
+const milestones = [
+    { id: 1,  heart: "💌", title: "O İlk Mesaj", desc: "Her şeyin başladığı, hayatlarımızın birbirine değdiği o ilk 'Merhaba'..." },
+    { id: 2,  heart: "📞", title: "Sesini İlk Duyduğum An", desc: "Kalp atışlarımı hızlandıran o ses tonuyla ilk tanışmam." },
+    { id: 3,  heart: "👀", title: "İlk Buluşma", desc: "Gözlerime ilk baktığın, zamanın tamamen durduğu o sihirli gün." },
+    { id: 4,  heart: "🤝", title: "İlk El Ele Tutuşma", desc: "Ellerimizin birbirine ne kadar çok yakıştığını fark ettiğimiz an." },
+    { id: 5,  heart: "🫂", title: "İlk Sımsıkı Sarılma", desc: "Bütün dertlerin bittiği, 'İşte evim burası' dediğim o huzurlu saniye." },
+    { id: 6,  heart: "💋", title: "İlk Öpücük", desc: "Dünyanın en tatlı heyecanı, dudaklarımdaki o ilk gülümseme." },
+    { id: 7,  heart: "💘", title: "İlk Kez 'Seni Seviyorum' Demek", desc: "İçimden taşan o üç kelimenin özgürlüğüne kavuştuğu an." },
+    { id: 8,  heart: "🍿", title: "Birlikte İlk Film", desc: "Filmden çok birbirimizi izlediğimiz o tatlı anlar." },
+    { id: 9,  heart: "🥺", title: "İlk Tartışma ve Barışma", desc: "Birbirimizi kırmaya kıyamayıp çok daha sıkı sarılarak barıştığımız ilk inatlaşma." },
+    { id: 10, heart: "🍽️", title: "Birlikte İlk Yemek", desc: "Karşılıklı oturup sohbetin yemeği güzelleştirdiği o ilk ziyafet." },
+    { id: 11, heart: "🌙", title: "Sabaha Kadar Konuştuğumuz İlk Gece", desc: "Uykusuzluğun bile seninle çok güzel olduğunu anladığım o uzun gece." },
+    { id: 12, heart: "🎁", title: "Bana Aldığın İlk Hediye", desc: "Sakladığım ve her baktığımda seni hatırlatan o ilk hatıra." },
+    { id: 13, heart: "👑", title: "Bana İlk 'Sevgilim' Dediğin An", desc: "O kelimenin dünyadaki en güzel unvan olduğuna inandığım saniye." },
+    { id: 14, heart: "🚶‍♀️", title: "Birlikte İlk Uzun Yürüyüş", desc: "Yolların seninle asla bitmemesini dilediğim o yürüyüş." },
+    { id: 15, heart: "📸", title: "Beraber İlk Fotoğrafımız", desc: "Gülümsemelerimizin aynı karede ölümsüzleştiği ilk an." },
+    { id: 16, heart: "🤧", title: "İlk 'Geçmiş Olsun' Şefkati", desc: "Hastayken bile senin sesinle iyileşebildiğimi gördüğüm gün." },
+    { id: 17, heart: "🎧", title: "Birlikte Dinlediğimiz İlk Şarkı", desc: "Artık ne zaman o şarkı çalsa, aklımda sadece senin belirdiğin o an." },
+    { id: 18, heart: "🔮", title: "Gelecek İçin Kurduğumuz İlk Hayal", desc: "Seninle bir ömür geçirme fikrinin içimi ısıttığı ilk hayalimiz." },
+    { id: 19, heart: "😤", title: "İlk Tatlı Kıskançlık Krizimiz", desc: "Beni sahiplenişinin ve o tatlı krizinin ne kadar hoşuma gittiği an." },
+    { id: 20, heart: "🌞", title: "Aynı Güne Uyandığımız O Sabah", desc: "Ayrı yerlerde olsak bile, 'Günaydın' mesajınla doğan güneşim." },
+    { id: 21, heart: "💖", title: "Bana Aşkla Baktığın O Son An", desc: "Zaman geçse de bana hep ilk günkü aşkla, parlayan gözlerle baktığın o an." },
+    { id: 22, heart: "♾️", title: "Bugün ve Sonsuza Dek...", desc: "Birlikte yazacağımız daha binlerce kilometre taşı için atılan bugünkü adım." }
+];
+
+// Notları localStorage'dan çek
+let savedMilestoneNotes = JSON.parse(localStorage.getItem('milestone_notes_v2')) || {};
+
+function renderTimeline() {
+    const container = document.getElementById('timeline');
+    container.innerHTML = '';
+    
+    milestones.forEach((m, index) => {
+        const note = savedMilestoneNotes[m.id] || "";
+        
+        const div = document.createElement('div');
+        div.className = 'milestone';
+        // Animasyonun sırayla akması için gecikme (delay) ekliyoruz
+        div.style.animationDelay = `${index * 0.1}s`;
+        
+        div.innerHTML = `
+            <div class="heart-icon">${m.heart}</div>
+            <div class="card">
+                <h3>${m.title}</h3>
+                <p>${m.desc}</p>
+                <div class="note-area">
+                    <textarea class="user-note-input" id="noteInput_${m.id}" placeholder="Bu anı için kendi hislerini buraya yazabilirsin sevgilim...">${note}</textarea>
+                    <div class="action-row">
+                        <span class="save-status" id="status_${m.id}">Kaydedildi ✨</span>
+                        <button class="save-btn" onclick="saveNote(${m.id})">Notu Kaydet 💾</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Not Kaydetme Fonksiyonu
+function saveNote(id) {
+    const inputEl = document.getElementById(`noteInput_${id}`);
+    const statusEl = document.getElementById(`status_${id}`);
+    
+    // Değeri al ve localStorage'a yaz
+    savedMilestoneNotes[id] = inputEl.value;
+    localStorage.setItem('milestone_notes_v2', JSON.stringify(savedMilestoneNotes));
+    
+    // Görsel geri bildirim ver (Kaydedildi yazısını göster ve gizle)
+    statusEl.style.opacity = "1";
+    setTimeout(() => {
+        statusEl.style.opacity = "0";
+    }, 2000);
+}
+
+// Sayfa yüklendiğinde çalıştır
+renderTimeline();
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+</body>
+</html>

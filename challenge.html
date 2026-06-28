@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşk Challenge 🃏</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink:      #0A1628;
+            --deep:     #112240;
+            --azure:    #2D6FBD;
+            --sky:      #6BB8E8;
+            --mist:     #C8E8F8;
+            --parchment:#EBF5FD;
+            --ember:    #FF6B8A;
+            --honey:    #F5C957;
+            --frost:    rgba(255,255,255,0.06);
+            --rim:      rgba(255,255,255,0.13);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif; background: var(--ink); color: var(--parchment);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden; padding: 20px; position: relative;
+        }
+
+        #bg-stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* ── Üst Bilgi / Sıra Göstergesi ── */
+        .turn-indicator {
+            position: relative; z-index: 10; margin-bottom: 40px; text-align: center;
+            background: var(--frost); border: 1px solid var(--rim); padding: 15px 30px;
+            border-radius: 50px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+        .turn-indicator h2 {
+            font-family: 'Cormorant Garamond', serif; font-size: 24px; font-style: italic;
+            color: var(--honey); margin: 0; transition: color 0.3s;
+        }
+        .turn-indicator.sara-turn { border-color: rgba(255,107,138,0.4); box-shadow: 0 0 20px rgba(255,107,138,0.2); }
+        .turn-indicator.sara-turn h2 { color: var(--ember); }
+        .turn-indicator.ertugrul-turn { border-color: rgba(107,184,232,0.4); box-shadow: 0 0 20px rgba(107,184,232,0.2); }
+        .turn-indicator.ertugrul-turn h2 { color: var(--sky); }
+
+        /* ── Kart Tasarımı ve 3D Döndürme Efekti ── */
+        .card-container {
+            position: relative; z-index: 10; width: 300px; height: 400px;
+            perspective: 1000px; margin-bottom: 30px;
+        }
+        .flipper {
+            width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d; position: relative; cursor: pointer;
+        }
+        .card-container.flipped .flipper { transform: rotateY(180deg); cursor: default; }
+
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        /* Kartın Arka Yüzü (Oyuncuya kapalı duran taraf) */
+        .front {
+            background: linear-gradient(135deg, var(--deep), var(--ink));
+            border: 2px dashed rgba(245,201,87,0.4);
+        }
+        .front .card-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        .front h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--honey); }
+        .front p { font-size: 13px; color: var(--mist); opacity: 0.7; margin-top: 10px; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Kartın Ön Yüzü (Soru/Görev yazan taraf) */
+        .back {
+            background: linear-gradient(135deg, #1e355a, var(--deep));
+            border: 2px solid var(--honey); transform: rotateY(180deg);
+            justify-content: space-between;
+        }
+        .task-type { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--honey); margin-bottom: 20px; font-weight: 600; }
+        .task-text { font-size: 18px; line-height: 1.5; font-weight: 500; color: var(--parchment); flex-grow: 1; display: flex; align-items: center; }
+        
+        .complete-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 50px; margin-top: 20px;
+            font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+            background: linear-gradient(135deg, var(--ember), #ff9eb5); color: #fff;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(255,107,138,0.3);
+        }
+        .complete-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,107,138,0.4); }
+
+        /* Uyarı Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-50px);
+            background: var(--frost); border: 1px solid var(--rim); color: #fff;
+            padding: 12px 25px; border-radius: 50px; font-size: 13px; font-weight: 600;
+            opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .back-btn { position: relative; z-index: 10; color: var(--mist); text-decoration: none; font-size: 13px; margin-top: 10px; opacity: 0.8; transition: 0.2s; }
+        .back-btn:hover { opacity: 1; color: #fff; }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-stars"></canvas>
+<div class="toast" id="toast">Sıra değişti!</div>
+
+<!-- Kimin Sırası Olduğunu Gösteren Alan -->
+<div class="turn-indicator sara-turn" id="turnIndicator">
+    <h2 id="turnText">Sıra: Sara 🌸</h2>
+</div>
+
+<!-- Çekilecek Kart Alanı -->
+<div class="card-container" id="cardContainer">
+    <div class="flipper" id="flipper" onclick="drawCard()">
+        <!-- Kapalı Hali -->
+        <div class="card-face front">
+            <div class="card-icon">🃏</div>
+            <h3>Kart Çek</h3>
+            <p>Meydan okumaya hazırsan dokun...</p>
+        </div>
+        <!-- Açık Hali (Görev) -->
+        <div class="card-face back">
+            <div class="task-type" id="taskType">DOĞRULUK</div>
+            <div class="task-text" id="taskText">Görev yükleniyor...</div>
+            <button class="complete-btn" onclick="completeTurn(event)">Yaptım / Cevapladım ✅</button>
+        </div>
+    </div>
+</div>
+
+<a href="index.html" class="back-btn">⬅️ Ana Sayfaya Dön</a>
+
+<script>
+/* ── Güvenlik / Giriş Kontrolü ── */
+(function(){
+  const ts = localStorage.getItem('sara_giris');
+  const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+  if((!ts || (Date.now() - parseInt(ts)) > EIGHT_HOURS) && !location.search.includes('dev')){
+    location.replace('giris.html');
+  }
+})();
+
+/* ── Arka Plan Yıldızları ── */
+(function () {
+    const cv = document.getElementById('bg-stars'); const ctx = cv.getContext('2d');
+    let W, H, stars = [];
+    function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mkStar() { return { x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + .2, a: Math.random(), da: (Math.random() * .003 + .001) * (Math.random() < .5 ? 1 : -1) }; }
+    function init() { resize(); stars = Array.from({ length: 60 }, mkStar); }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+            s.a = Math.max(.05, Math.min(.95, s.a + s.da)); if (s.a <= .05 || s.a >= .95) s.da *= -1;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize', () => { resize(); stars = Array.from({ length: 60 }, mkStar); });
+    init(); draw();
+})();
+
+/* ── Oyun Verileri ve Mantığı ── */
+const tasks = [
+    { type: "DOĞRULUK 🤫", text: "İlk buluşmamızda eve döndüğünde benim hakkımda tam olarak ne düşünmüştün?" },
+    { type: "CESARET 🔥", text: "Telefonunu aç, galerindeki 15. fotoğrafı göster ve hikayesini dürüstçe anlat." },
+    { type: "CESARET 🔥", text: "Bir dakika boyunca gözünü benden hiç ayırmadan, bende en sevdiğin 3 özelliği anlat." },
+    { type: "DOĞRULUK 🤫", text: "Bana ilk ne zaman, tam olarak hangi anda 'Evet, ben bu çocuğa/kıza aşık oluyorum' dedin?" },
+    { type: "CESARET 🔥", text: "Karşı tarafın boynundan veya yanağından en sevdiğin şekilde uzun uzun öp." },
+    { type: "DOĞRULUK 🤫", text: "Şimdiye kadar sana yaptığım en unutulmaz, en seni etkileyen sürpriz neydi?" },
+    { type: "CESARET 🔥", text: "İki dakika boyunca birbirinizin gözlerinin içine hiç konuşmadan ve gülmeden bakın. (Gülen ceza alır!)" },
+    { type: "DOĞRULUK 🤫", text: "Bende değiştirmek isteyeceğin ama değiştiremeyeceğini bildiğin o minik sinir bozucu huyum ne?" },
+    { type: "CESARET 🔥", text: "Karşı tarafın seçeceği bir şarkıda 30 saniye boyunca onunla dans et." },
+    { type: "DOĞRULUK 🤫", text: "Benimle ilgili aklına gelen en komik veya en utanç verici anımız hangisi?" },
+    { type: "CESARET 🔥", text: "Karşı tarafa 3 dakika boyunca omuz/boyun masajı yap." },
+    { type: "CESARET 🔥", text: "Şu an içinden gelen, tamamen doğaçlama romantik bir cümle kur." }
+];
+
+// Görevleri rastgele karıştır
+let shuffledTasks = [...tasks].sort(() => Math.random() - 0.5);
+let currentPlayer = "Sara"; // Oyuna Sara başlıyor
+let isCardFlipped = false;
+
+const container = document.getElementById('cardContainer');
+const taskTypeEl = document.getElementById('taskType');
+const taskTextEl = document.getElementById('taskText');
+const turnIndicator = document.getElementById('turnIndicator');
+const turnText = document.getElementById('turnText');
+const toast = document.getElementById('toast');
+
+function drawCard() {
+    if (isCardFlipped) return; // Zaten açıksa tekrar tıklanmasını engelle
+
+    if (shuffledTasks.length === 0) {
+        taskTypeEl.textContent = "OYUN BİTTİ 🏁";
+        taskTextEl.textContent = "Bütün kartları çektiniz! Kazanan: İkinizin arasındaki muazzam aşk! 💙";
+        container.classList.add('flipped');
+        document.querySelector('.complete-btn').style.display = 'none';
+        return;
+    }
+
+    // Sıradaki görevi al
+    const currentTask = shuffledTasks.pop();
+    taskTypeEl.textContent = currentTask.type;
+    taskTextEl.textContent = currentTask.text;
+
+    // Kartı çevir
+    isCardFlipped = true;
+    container.classList.add('flipped');
+}
+
+function completeTurn(event) {
+    event.stopPropagation(); // Kartın tıklama olayını tetiklemesini engelle
+    
+    // Kartı geri kapat
+    container.classList.remove('flipped');
+    
+    // Sırayı değiştir
+    setTimeout(() => {
+        if (currentPlayer === "Sara") {
+            currentPlayer = "Ertuğrul";
+            turnIndicator.className = "turn-indicator ertugrul-turn";
+            turnText.textContent = "Sıra: Ertuğrul 😎";
+        } else {
+            currentPlayer = "Sara";
+            turnIndicator.className = "turn-indicator sara-turn";
+            turnText.textContent = "Sıra: Sara 🌸";
+        }
+        
+        isCardFlipped = false;
+        showToast(`Sıra ${currentPlayer}'a geçti!`);
+    }, 400); // Kart kapanma animasyonunun yarısında yazıyı değiştir
+}
+
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+</body>
+</html>

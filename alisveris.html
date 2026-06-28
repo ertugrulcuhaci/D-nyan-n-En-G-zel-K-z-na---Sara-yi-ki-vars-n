@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ertuğrul'u Tasarla 🛒</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink:      #0A1628;
+            --deep:     #112240;
+            --azure:    #2D6FBD;
+            --sky:      #6BB8E8;
+            --mist:     #C8E8F8;
+            --parchment:#EBF5FD;
+            --ember:    #FF6B8A;
+            --honey:    #F5C957;
+            --frost:    rgba(255,255,255,0.06);
+            --rim:      rgba(255,255,255,0.13);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--ink); color: var(--parchment);
+            min-height: 100vh; padding: 20px 10px;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden; position: relative;
+        }
+
+        #bg-stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* ── Header & Bütçe Alanı ── */
+        .header-panel {
+            position: relative; z-index: 10; width: 100%; max-width: 500px;
+            background: var(--frost); border: 1px solid var(--rim); border-radius: 20px;
+            padding: 20px; margin-bottom: 20px; text-align: center;
+            backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .profile-area { display: flex; align-items: center; gap: 15px; }
+        .profile-img {
+            width: 70px; height: 70px; border-radius: 50%;
+            border: 3px solid var(--honey); object-fit: cover;
+            box-shadow: 0 0 15px rgba(245,201,87,0.4);
+        }
+        .header-text { text-align: left; }
+        .header-text h1 {
+            font-family: 'Cormorant Garamond', serif; font-size: 24px; font-style: italic;
+            color: var(--honey); margin-bottom: 2px;
+        }
+        .header-text p { font-size: 11px; color: var(--mist); opacity: 0.8; }
+
+        .budget-box {
+            background: rgba(45,111,189,0.2); border: 1px solid rgba(107,184,232,0.3);
+            padding: 10px 15px; border-radius: 12px; text-align: center;
+        }
+        .budget-box span { display: block; font-size: 10px; color: rgba(200,232,248,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;}
+        .budget-box strong { font-size: 22px; color: var(--sky); }
+
+        /* ── Market / Özellikler Grid ── */
+        .market-grid {
+            position: relative; z-index: 10; width: 100%; max-width: 500px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .trait-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 15px 12px; text-align: center;
+            transition: transform 0.2s, background 0.2s; display: flex; flex-direction: column;
+        }
+        .trait-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.06); }
+        .trait-icon { font-size: 28px; margin-bottom: 8px; }
+        .trait-name { font-size: 13px; font-weight: 600; color: var(--parchment); margin-bottom: 4px; line-height: 1.3; }
+        .trait-desc { font-size: 10px; color: rgba(200,232,248,0.5); margin-bottom: 12px; flex-grow: 1; line-height: 1.4; }
+        
+        .add-btn {
+            width: 100%; padding: 8px; border: none; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;
+            background: rgba(45,111,189,0.2); color: var(--sky); border: 1px solid rgba(107,184,232,0.3);
+            transition: 0.2s;
+        }
+        .add-btn:hover { background: rgba(45,111,189,0.4); }
+        .add-btn.added { background: rgba(47,181,122,0.2); color: #58D6A0; border-color: rgba(47,181,122,0.4); }
+        .add-btn.bad-trait { background: rgba(255,107,138,0.15); color: var(--ember); border-color: rgba(255,107,138,0.3); }
+
+        /* ── Sepet Alanı ── */
+        .cart-panel {
+            position: relative; z-index: 10; width: 100%; max-width: 500px;
+            background: var(--frost); border: 1px solid var(--rim); border-radius: 20px;
+            padding: 20px; backdrop-filter: blur(20px); margin-bottom: 20px;
+        }
+        .cart-header { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--honey); margin-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; }
+        
+        #cartItems { list-style: none; margin-bottom: 15px; font-size: 12px; }
+        #cartItems li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .remove-item { background: transparent; border: none; color: var(--ember); cursor: pointer; font-size: 14px; padding: 0 5px; }
+
+        .cart-total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 15px; color: var(--sky); }
+        
+        .checkout-btn {
+            width: 100%; padding: 14px; border: none; border-radius: 50px;
+            font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+            background: linear-gradient(135deg, var(--ember), var(--honey)); color: #fff;
+            box-shadow: 0 8px 24px rgba(255,107,138,0.35); cursor: pointer; transition: 0.2s;
+        }
+        .checkout-btn:disabled { background: #333; color: #888; box-shadow: none; cursor: not-allowed; }
+
+        /* ── Sürpriz Ekranı ── */
+        .surprise-overlay {
+            position: fixed; inset: 0; z-index: 100; background: rgba(10,22,40,0.96);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.6s ease; padding: 20px; text-align: center;
+        }
+        .surprise-overlay.show { opacity: 1; pointer-events: auto; }
+        .surprise-box { max-width: 420px; transform: scale(0.8); transition: transform 0.6s cubic-bezier(.175, .885, .32, 1.275); }
+        .surprise-overlay.show .surprise-box { transform: scale(1); }
+        
+        .surprise-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--ember); object-fit: cover; margin-bottom: 15px; box-shadow: 0 0 30px rgba(255,107,138,0.5); }
+        .surprise-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-style: italic; color: var(--honey); margin-bottom: 12px; }
+        .surprise-msg { font-size: 13px; color: var(--parchment); line-height: 1.7; margin-bottom: 24px; opacity: 0.95; }
+        
+        .back-home {
+            display: inline-block; padding: 12px 30px; border-radius: 50px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s;
+        }
+        .back-home:hover { background: rgba(255,255,255,0.15); }
+
+        /* Uyarı Mesajı */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-50px);
+            background: var(--ember); color: #fff; padding: 10px 20px; border-radius: 50px;
+            font-size: 12px; font-weight: 600; opacity: 0; transition: 0.3s; z-index: 200;
+            box-shadow: 0 5px 15px rgba(255,107,138,0.5);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        @media (max-width: 400px) { .market-grid { grid-template-columns: 1fr; } }
+        .piece { position: fixed; top: -20px; z-index: 150; pointer-events: none; animation: pfall linear forwards; }
+        @keyframes pfall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-stars"></canvas>
+<div class="toast" id="toast">Bütçen yetmiyor prenses! 💸</div>
+
+<div class="surprise-overlay" id="surpriseOverlay">
+    <div class="surprise-box">
+        <img src="ertugrul.png" alt="Ertuğrul" class="surprise-img">
+        <h2 class="surprise-title">Siparişi Onayladın! 🎉</h2>
+        <p class="surprise-msg">
+            Aşk puanlarını harcarken ne kadar zorlandığını biliyorum... Bazı iyi özelliklerimi bütçen yetmediği için alamadın, bazen de ucuz diye sinir bozucu huylarımı sepete attın. 😂<br><br>
+            Ama sana bir sır vereyim mi? Aslında o bütçenin hiçbir önemi yoktu. Çünkü iyi huylarımla, kötü huylarımla, şımarıklıklarımla ve sana olan sonsuz aşkımla... <b>Ben zaten tamamen seninim!</b> Bütün bu özellikler sana bedava prensesim. Seni çok seviyorum! 💙💍
+        </p>
+        <a href="index.html" class="back-home">⬅️ Ana Sayfaya Dön</a>
+    </div>
+</div>
+
+<div class="header-panel">
+    <div class="profile-area">
+        <img src="ertugrul.png" alt="Ertuğrul" class="profile-img">
+        <div class="header-text">
+            <h1>Kendi Ertuğrul'unu Tasarla</h1>
+            <p>Bütçeni akıllıca kullan 🥺</p>
+        </div>
+    </div>
+    <div class="budget-box">
+        <span>Aşk Puanı</span>
+        <strong id="budgetDisplay">150 ₺</strong>
+    </div>
+</div>
+
+<div class="market-grid" id="marketGrid">
+    </div>
+
+<div class="cart-panel">
+    <h2 class="cart-header">Alışveriş Sepetin 🛒</h2>
+    <ul id="cartItems">
+        <li style="color: rgba(255,255,255,0.3); justify-content: center;">Sepetin şu an boş...</li>
+    </ul>
+    <div class="cart-total">
+        <span>Toplam Tutar:</span>
+        <span id="totalDisplay">0 ₺</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn" disabled onclick="checkout()">Ertuğrul'u Satın Al 💝</button>
+</div>
+
+<script>
+/* ── Güvenlik / Giriş Kontrolü ── */
+(function(){
+  const ts = localStorage.getItem('sara_giris');
+  const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+  if((!ts || (Date.now() - parseInt(ts)) > EIGHT_HOURS) && !location.search.includes('dev')){
+    location.replace('giris.html');
+  }
+})();
+
+/* ── Arka Plan Yıldızları ── */
+(function () {
+    const cv = document.getElementById('bg-stars'); const ctx = cv.getContext('2d');
+    let W, H, stars = [];
+    function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mkStar() { return { x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + .2, a: Math.random(), da: (Math.random() * .003 + .001) * (Math.random() < .5 ? 1 : -1) }; }
+    function init() { resize(); stars = Array.from({ length: 60 }, mkStar); }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+            s.a = Math.max(.05, Math.min(.95, s.a + s.da)); if (s.a <= .05 || s.a >= .95) s.da *= -1;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize', () => { resize(); stars = Array.from({ length: 60 }, mkStar); });
+    init(); draw();
+})();
+
+/* ── Market Özellikleri (Toplam iyi özellik fiyatı 150'yi çok aşıyor ki seçmek zorunda kalsın) ── */
+const traits = [
+    { id: 1, name: "Aşırı Yakışıklılık", desc: "Gözlerini alamayacağın o muazzam yüz hattı.", price: 40, icon: "😎", type: "good" },
+    { id: 2, name: "Sonsuz Sadakat", desc: "Gözü senden başkasını asla görmez.", price: 50, icon: "🐶", type: "good" },
+    { id: 3, name: "Ani Kıskançlık Krizleri", desc: "Hafif yorucu ama sahiplenici tatlı kıskançlıklar.", price: 15, icon: "👀", type: "bad" },
+    { id: 4, name: "Mükemmel Sarılma", desc: "Modun düştüğünde her şeyi unutturan sıcacık sarılma.", price: 35, icon: "🧸", type: "good" },
+    { id: 5, name: "Mızmızlık Modu", desc: "İlgi çekmek için yapılan ufak tefek şımarıklıklar.", price: 10, icon: "🥺", type: "bad" },
+    { id: 6, name: "Bitmek Bilmeyen Romantizm", desc: "Sürekli sürprizler ve iltifat yağmuru.", price: 30, icon: "🌹", type: "good" },
+    { id: 7, name: "Tatlı İnatçılık", desc: "Bazen çok haklı olsan da asla kabul etmeme huyu.", price: 10, icon: "😤", type: "bad" },
+    { id: 8, name: "Mükemmel Aşçılık", desc: "Sana gece yarısı en güzel atıştırmalıkları hazırlar.", price: 25, icon: "👨‍🍳", type: "good" },
+    { id: 9, name: "Trip Atma Uzmanlığı", desc: "Haklıyken bile haksız çıkabileceğin profesyonel tripler.", price: 15, icon: "😒", type: "bad" },
+    { id: 10, name: "Bebek Gibi Uyumak", desc: "Sabahları uyanmak bilmeyen o tatlı uyku serseriliği.", price: 5, icon: "😴", type: "bad" }
+];
+
+let BUDGET = 150;
+let currentTotal = 0;
+let cart = [];
+
+const marketGrid = document.getElementById('marketGrid');
+const cartItems = document.getElementById('cartItems');
+const totalDisplay = document.getElementById('totalDisplay');
+const budgetDisplay = document.getElementById('budgetDisplay');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const toast = document.getElementById('toast');
+
+// Marketi Oluştur
+function renderMarket() {
+    marketGrid.innerHTML = '';
+    traits.forEach(t => {
+        const isAdded = cart.some(item => item.id === t.id);
+        const btnClass = isAdded ? 'add-btn added' : (t.type === 'bad' ? 'add-btn bad-trait' : 'add-btn');
+        const btnText = isAdded ? 'Sepette ✓' : `${t.price} ₺ - Sepete Ekle`;
+        
+        const card = document.createElement('div');
+        card.className = 'trait-card';
+        card.innerHTML = `
+            <div class="trait-icon">${t.icon}</div>
+            <div class="trait-name">${t.name}</div>
+            <div class="trait-desc">${t.desc}</div>
+            <button class="${btnClass}" onclick="toggleCart(${t.id})">${btnText}</button>
+        `;
+        marketGrid.appendChild(card);
+    });
+}
+
+function toggleCart(id) {
+    const trait = traits.find(t => t.id === id);
+    const inCartIndex = cart.findIndex(item => item.id === id);
+
+    if (inCartIndex > -1) {
+        // Sepetten Çıkar
+        cart.splice(inCartIndex, 1);
+        currentTotal -= trait.price;
+    } else {
+        // Bütçe Kontrolü
+        if (currentTotal + trait.price > BUDGET) {
+            showToast();
+            return;
+        }
+        // Sepete Ekle
+        cart.push(trait);
+        currentTotal += trait.price;
+    }
+    
+    updateCartUI();
+    renderMarket();
+}
+
+function updateCartUI() {
+    budgetDisplay.textContent = (BUDGET - currentTotal) + ' ₺';
+    totalDisplay.textContent = currentTotal + ' ₺';
+    
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<li style="color: rgba(255,255,255,0.3); justify-content: center;">Sepetin şu an boş...</li>';
+        checkoutBtn.disabled = true;
+    } else {
+        cartItems.innerHTML = '';
+        cart.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${item.icon} ${item.name}</span>
+                <div>
+                    <span style="color: var(--sky); margin-right: 10px;">${item.price} ₺</span>
+                    <button class="remove-item" onclick="toggleCart(${item.id})">✖</button>
+                </div>
+            `;
+            cartItems.appendChild(li);
+        });
+        checkoutBtn.disabled = false;
+    }
+}
+
+function showToast() {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function checkout() {
+    const overlay = document.getElementById('surpriseOverlay');
+    overlay.classList.add('show');
+    burstEffects(80);
+}
+
+/* ── Konfeti Efekti ── */
+const COLS = ['#FF6B8A','#F5C957','#6BB8E8','#fff','#FF9AC3'];
+function burstEffects(n){
+    for(let i=0; i<n; i++){
+        const el = document.createElement('div'); el.className = 'piece';
+        el.style.left = Math.random() * 100 + 'vw'; el.style.background = COLS[Math.floor(Math.random() * COLS.length)];
+        const s = Math.random() * 8 + 6; el.style.width = s + 'px'; el.style.height = s + 'px';
+        el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+        const dur = (Math.random() * 2.5 + 2.5).toFixed(2); el.style.animationDuration = dur + 's'; el.style.animationDelay = (Math.random() * 0.8).toFixed(2) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), (parseFloat(dur) + 2) * 1000);
+    }
+}
+
+// Başlangıç
+renderMarket();
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalp Yakalamace 🧺❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink:      #0A1628;
+            --deep:     #112240;
+            --azure:    #2D6FBD;
+            --sky:      #6BB8E8;
+            --mist:     #C8E8F8;
+            --parchment:#EBF5FD;
+            --ember:    #FF6B8A;
+            --honey:    #F5C957;
+            --frost:    rgba(255,255,255,0.06);
+            --rim:      rgba(255,255,255,0.13);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--ink);
+            color: var(--parchment);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            overflow: hidden; padding: 15px;
+            position: relative;
+            user-select: none;
+        }
+
+        #bg-stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .card {
+            position: relative; z-index: 10;
+            background: var(--frost); border: 1px solid var(--rim); border-radius: 28px;
+            padding: 24px 20px; max-width: 100%; width: 420px; text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif; font-size: 26px; font-style: italic; font-weight: 600;
+            background: linear-gradient(135deg, var(--ember), var(--honey));
+            -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2px;
+        }
+        .desc { font-size: 11px; color: rgba(200,232,248,0.5); margin-bottom: 16px; }
+
+        .status-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.03); border-radius: 12px;
+            padding: 8px 16px; margin-bottom: 14px; font-size: 13px;
+        }
+        .score-box span { color: var(--honey); font-weight: 600; }
+        
+        .love-note {
+            min-height: 40px; font-size: 12px; color: var(--mist);
+            font-style: italic; display: flex; align-items: center; justify-content: center;
+            padding: 4px 10px; margin-bottom: 14px;
+            background: rgba(107,184,232,0.08); border-radius: 12px;
+            border: 1px dashed rgba(107,184,232,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .game-container {
+            position: relative; width: 100%; aspect-ratio: 4 / 4.5;
+            background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px; overflow: hidden; margin-bottom: 18px;
+            touch-action: none;
+        }
+        #gameCanvas { display: block; width: 100%; height: 100%; }
+
+        .back-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; width: 100%; padding: 12px 20px; border: none; border-radius: 50px;
+            font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; color: #fff; text-decoration: none;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            transition: .2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+
+        .win-overlay {
+            position: fixed; inset: 0; z-index: 100; background: rgba(10,22,40,0.96);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease; padding: 20px; text-align: center;
+        }
+        .win-overlay.show { opacity: 1; pointer-events: auto; }
+        .win-box { max-width: 380px; transform: scale(0.8); transition: transform 0.5s ease; }
+        .win-overlay.show .win-box { transform: scale(1); }
+        .win-icon { font-size: 60px; margin-bottom: 12px; animation: float 2s infinite alternate ease-in-out; }
+        @keyframes float { from{transform:translateY(0)} to{transform:translateY(-10px)} }
+        .win-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-style: italic; color: var(--ember); margin-bottom: 12px; }
+        .win-msg { font-size: 13px; color: var(--parchment); line-height: 1.6; margin-bottom: 24px; opacity: 0.9; }
+        .btn-restart {
+            padding: 12px 36px; border: none; border-radius: 50px; font-family: 'Poppins', sans-serif;
+            font-size: 14px; font-weight: 600; color: #fff; cursor: pointer;
+            background: linear-gradient(135deg, var(--azure), var(--sky)); box-shadow: 0 8px 20px rgba(45,111,189,0.4);
+        }
+
+        .piece { position: fixed; top: -20px; z-index: 150; pointer-events: none; animation: pfall linear forwards; }
+        @keyframes pfall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-stars"></canvas>
+
+<div class="win-overlay" id="winOverlay">
+    <div class="win-box">
+        <div class="win-icon">💝</div>
+        <h2 class="win-title">Tebrikler Sevgilim!</h2>
+        <p class="win-msg">Düşen tüm sevgileri eksiksiz topladin! Seninle gecen her gün, bu oyundaki gibi mutluluk ve heyecan dolu. Seni deliler gibi seviyorum Sara'm... 👑💙</p>
+        <button class="btn-restart" onclick="resetGame()">Yeniden Oyna ✨</button>
+    </div>
+</div>
+
+<div class="card">
+    <h1>Sevgi Yakalamace</h1>
+    <p class="desc">Sepeti hareket ettir, kalpleri yakala ve mesajları aç! 🧺</p>
+
+    <div class="status-row">
+        <div class="score-box">Skor: <span id="scoreVal">0</span> / 500</div>
+        <div id="targetLbl" style="font-size: 11px; color: rgba(255,255,255,0.4);">Hedef: 500</div>
+    </div>
+
+    <div class="love-note" id="loveNote">Kalpleri toplamaya başla, senin için notlarım var... 🥰</div>
+
+    <div class="game-container" id="canvasWrapper">
+        <canvas id="gameCanvas" width="400" height="450"></canvas>
+    </div>
+
+    <a href="index.html" class="back-btn">⬅️ Ana Sayfaya Dön</a>
+</div>
+
+<script>
+/* ── Güvenlik / Giriş Kontrolü ── */
+(function(){
+  const ts = localStorage.getItem('sara_giris');
+  const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+  if((!ts || (Date.now() - parseInt(ts)) > EIGHT_HOURS) && !location.search.includes('dev')){
+    location.replace('giris.html');
+  }
+})();
+
+/* ── Arka Plan Yıldızları ── */
+(function () {
+    const cv = document.getElementById('bg-stars'); const ctx = cv.getContext('2d');
+    let W, H, stars = [];
+    function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mkStar() { return { x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + .2, a: Math.random(), da: (Math.random() * .003 + .001) * (Math.random() < .5 ? 1 : -1) }; }
+    function init() { resize(); stars = Array.from({ length: 50 }, mkStar); }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach(s => {
+            s.a = Math.max(.05, Math.min(.95, s.a + s.da)); if (s.a <= .05 || s.a >= .95) s.da *= -1;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize', () => { resize(); stars = Array.from({ length: 50 }, mkStar); });
+    init(); draw();
+})();
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let score = 0;
+let gameOver = false;
+let gameRunning = true;
+
+const basket = { x: 170, y: 400, width: 65, height: 35, emoji: "🧺", speed: 15 };
+let items = [];
+const itemTypes = [
+    { emoji: "❤️", points: 10, weight: 0.5 },
+    { emoji: "💙", points: 20, weight: 0.3 },
+    { emoji: "✨", points: 30, weight: 0.15 },
+    { emoji: "👑", points: 50, weight: 0.05 }
+];
+
+const NOTES = [
+    { min: 0,   text: "Kalpleri toplamaya başla, senin için notlarım var... 🥰" },
+    { min: 100, text: "Gözlerine her baktığımda ilk günkü gibi heyecanlanıyorum... 👀💙" },
+    { min: 200, text: "Sen benim bu hayatta başıma gelen en ama en güzel şeysin. 🌸" },
+    { min: 300, text: "Kalp atışlarımın ritmini değiştiren tek insansın Sara'm. 👑" },
+    { min: 400, text: "Gökyüzündeki tüm yıldızları toplasam senin tek bir gülüşün etmez! ✨" }
+];
+
+const scoreValEl = document.getElementById('scoreVal');
+const loveNoteEl = document.getElementById('loveNote');
+const winOverlay = document.getElementById('winOverlay');
+
+function spawnItem() {
+    if (gameOver || !gameRunning) return;
+    let rand = Math.random();
+    let selectedType = itemTypes[0];
+    let sum = 0;
+    for (let type of itemTypes) {
+        sum += type.weight;
+        if (rand <= sum) { selectedType = type; break; }
+    }
+    items.push({
+        x: Math.random() * (canvas.width - 30) + 5, y: -30, size: 26,
+        emoji: selectedType.emoji, points: selectedType.points,
+        speed: Math.random() * 1.5 + 2.5 + (score * 0.003)
+    });
+    setTimeout(spawnItem, Math.random() * 600 + 700);
+}
+
+let keys = {};
+window.addEventListener('keydown', e => { keys[e.key] = true; });
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+const wrapper = document.getElementById('canvasWrapper');
+function handleMove(clientX) {
+    if(gameOver || !gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    let relX = (clientX - rect.left) * scaleX;
+    basket.x = relX - basket.width / 2;
+    if (basket.x < 0) basket.x = 0;
+    if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width;
+}
+wrapper.addEventListener('mousemove', e => handleMove(e.clientX));
+wrapper.addEventListener('touchmove', e => { if(e.touches.length > 0) handleMove(e.touches[0].clientX); }, { passive: true });
+
+function update() {
+    if (gameOver || !gameRunning) return;
+    if (keys['ArrowLeft'] || keys['a']) { basket.x -= basket.speed; if (basket.x < 0) basket.x = 0; }
+    if (keys['ArrowRight'] || keys['d']) { basket.x += basket.speed; if (basket.x > canvas.width - basket.width) basket.x = canvas.width - basket.width; }
+
+    for (let i = items.length - 1; i >= 0; i--) {
+        let it = items[i]; it.y += it.speed;
+        if (it.y + 10 >= basket.y && it.y - 10 <= basket.y + basket.height && it.x + 15 >= basket.x && it.x - 15 <= basket.x + basket.width) {
+            score += it.points; if (score > 500) score = 500;
+            scoreValEl.textContent = score;
+            updateLoveNote();
+            items.splice(i, 1);
+            if (score >= 500) triggerWin();
+            continue;
+        }
+        if (it.y > canvas.height + 40) items.splice(i, 1);
+    }
+}
+
+function updateLoveNote() {
+    let currentNote = NOTES[0].text;
+    for (let note of NOTES) { if (score >= note.min) currentNote = note.text; }
+    if(loveNoteEl.textContent !== currentNote) {
+        loveNoteEl.style.opacity = 0;
+        setTimeout(() => { loveNoteEl.textContent = currentNote; loveNoteEl.style.opacity = 1; }, 150);
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "38px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText(basket.emoji, basket.x, basket.y);
+    items.forEach(it => { ctx.font = `${it.size}px Arial`; ctx.fillText(it.emoji, it.x, it.y); });
+}
+
+function gameLoop() { update(); draw(); if (!gameOver) requestAnimationFrame(gameLoop); }
+function triggerWin() { gameOver = true; winOverlay.classList.add('show'); burst(60); }
+function resetGame() { winOverlay.classList.remove('show'); score = 0; scoreValEl.textContent = score; items = []; gameOver = false; gameRunning = true; updateLoveNote(); gameLoop(); }
+
+const COLS = ['#FF6B8A','#F5C957','#6BB8E8','#fff','#FF9AC3'];
+function burst(n){
+    for(let i=0; i<n; i++){
+        const el = document.createElement('div'); el.className = 'piece';
+        el.style.left = Math.random() * 100 + 'vw'; el.style.background = COLS[Math.floor(Math.random() * COLS.length)];
+        const s = Math.random() * 8 + 6; el.style.width = s + 'px'; el.style.height = s + 'px';
+        el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+        const dur = (Math.random() * 2 + 2.5).toFixed(2); el.style.animationDuration = dur + 's'; el.style.animationDelay = (Math.random() * 0.5).toFixed(2) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), (parseFloat(dur) + 2) * 1000);
+    }
+}
+setTimeout(spawnItem, 1000); gameLoop();
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oyun Odamız 🎮</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;0,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ink:#0A1628; --deep:#112240; --mid:#1C3A64;
+        --azure:#2D6FBD; --sky:#6BB8E8; --mist:#C8E8F8; --parchment:#EBF5FD;
+        --ember:#FF6B8A; --honey:#F5C957;
+        --frost:rgba(255,255,255,0.06); --rim:rgba(255,255,255,0.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: var(--ink); color: var(--parchment);
+        min-height: 100vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 32px 16px 48px; overflow-x: hidden; position: relative;
+    }
+    canvas#cv { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .page-header { position: relative; z-index: 1; text-align: center; margin-bottom: 36px; }
+    .eyebrow { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(200,232,248,.4); margin-bottom: 10px; }
+    h1 {
+        font-family: 'Cormorant Garamond', serif; font-size: clamp(32px,8vw,52px);
+        font-style: italic; font-weight: 600; line-height: 1;
+        background: linear-gradient(135deg, var(--honey), var(--sky));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        margin-bottom: 8px;
+    }
+    .sub { font-size: 13px; font-weight: 300; color: rgba(200,232,248,.5); }
+
+    /* Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; max-width: 920px; width: 100%; position: relative; z-index: 1; }
+
+    .card {
+        background: var(--frost); border: 1px solid var(--rim);
+        border-radius: 22px; padding: 28px 22px 22px;
+        display: flex; flex-direction: column; align-items: center;
+        text-decoration: none; color: inherit;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 16px 40px rgba(0,0,0,.35);
+        transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s, border-color .28s;
+        opacity: 0; animation: fadeUp .5s ease forwards;
+    }
+    .card:nth-child(1) { animation-delay: .08s; }
+    .card:nth-child(2) { animation-delay: .18s; }
+    .card:nth-child(3) { animation-delay: .28s; }
+    .card:nth-child(4) { animation-delay: .38s; }
+    .card:nth-child(5) { animation-delay: .48s; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(107,184,232,.15); }
+
+    .card-icon {
+        width: 64px; height: 64px; border-radius: 18px; margin-bottom: 16px;
+        display: flex; align-items: center; justify-content: center; font-size: 30px;
+        background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
+    }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--sky); margin-bottom: 7px; text-align: center; }
+    .card-desc { font-size: 12px; color: rgba(200,232,248,.65); line-height: 1.5; text-align: center; margin-bottom: 18px; flex: 1; }
+
+    .play-btn {
+        width: 100%; padding: 10px; border: none; border-radius: 30px;
+        font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
+        cursor: pointer; color: #fff; letter-spacing: .2px;
+        transition: filter .2s, transform .15s;
+    }
+    .play-btn:hover { filter: brightness(1.12); }
+    .play-btn:active { transform: scale(.97); }
+    .play-btn.blue  { background: linear-gradient(135deg, var(--azure), var(--sky)); }
+    .play-btn.rose  { background: linear-gradient(135deg, var(--ember), var(--honey)); }
+    .play-btn.green { background: linear-gradient(135deg, #2fb57a, #58d6a0); }
+    .play-btn.purple{ background: linear-gradient(135deg, #7c5cbf, #b08ee0); }
+    .play-btn.teal  { background: linear-gradient(135deg, #1a8fa0, #42cad4); }
+
+    /* Mızmız kartı hafif pembe ton */
+    .card.miz { border-color: rgba(255,107,138,.18); }
+    .card.miz:hover { border-color: rgba(255,107,138,.35); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(255,107,138,.18); }
+
+    /* Yeni: Sevgi notu kartı */
+    .card.note { border-color: rgba(245,201,87,.18); }
+    .card.note:hover { border-color: rgba(245,201,87,.35); box-shadow: 0 24px 50px rgba(0,0,0,.45), 0 0 28px rgba(245,201,87,.18); }
+
+    .back {
+        position: relative; z-index: 1; margin-top: 30px;
+        padding: 10px 26px; border: 1.5px solid rgba(107,184,232,.4);
+        background: transparent; color: var(--sky); border-radius: 30px;
+        font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px;
+        cursor: pointer; transition: .25s;
+    }
+    .back:hover { background: var(--sky); color: var(--ink); }
+
+    @media (max-width: 500px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 340px) { .grid { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { .card { animation: none; opacity: 1; } }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<header class="page-header">
+    <p class="eyebrow">Sadece ikimiz için</p>
+    <h1>Oyun Odamız</h1>
+    <p class="sub">Bir macera seç, başlayalım 💙</p>
+</header>
+
+<div class="grid">
+
+    <a href="hafiza.html" class="card">
+        <div class="card-icon">🧩</div>
+        <h3 class="card-title">Anı Eşleştirme</h3>
+        <p class="card-desc">En güzel anlarımızı ne kadar iyi hatırlıyorsun? Kartları çevir, eşleştir.</p>
+        <button class="play-btn blue">Oyna</button>
+    </a>
+
+    <a href="masal.html" class="card">
+        <div class="card-icon">📖</div>
+        <h3 class="card-title">Turluk Masalı</h3>
+        <p class="card-desc">Kendi seçimlerinle hikayemizin gidişatını belirle. Her sayfa bir sürpriz.</p>
+        <button class="play-btn teal">Oku & Seç</button>
+    </a>
+
+    <a href="kosu.html" class="card">
+        <div class="card-icon">🏃‍♂️</div>
+        <h3 class="card-title">Sonsuz Aşk Koşusu</h3>
+        <p class="card-desc">Engelleri aş, zıpla — ve sonunda bana ulaş! Kaç tur dayanabilirsin?</p>
+        <button class="play-btn green">Başla</button>
+    </a>
+
+    <a href="not.html" class="card note">
+        <div class="card-icon">💌</div>
+        <h3 class="card-title">Sevgi Notu</h3>
+        <p class="card-desc">Bugün sana bir şey yazmak istedim. Açmak için hazır mısın?</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#F5C957,#FF9AC3);">Aç 💛</button>
+    </a>
+
+    <a href="mizmiz.html" class="card miz">
+        <div class="card-icon">😤</div>
+        <h3 class="card-title">Mızmızlık Köşesi</h3>
+        <p class="card-desc">Şikayetlerini buraya bırak. Belki işe yarar... belki de güleriz.</p>
+        <button class="play-btn rose">Şikayet Et 😏</button>
+    </a>
+
+    <a href="kahve.html" class="card" style="border-color:rgba(160,82,45,.25);">
+        <div class="card-icon" style="background:rgba(92,51,23,.25);border-color:rgba(160,82,45,.2);">☕</div>
+        <h3 class="card-title" style="color:#D2956A;">Kahve Köşen</h3>
+        <p class="card-desc">Bağımlılığına özel bir köşe. Sürpriz var içinde 🤫</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#5C3317,#A0522D);">Hadi Bir Yudum ☕</button>
+    </a>
+
+    <a href="davetiye.html" class="card" style="border-color:rgba(212,175,55,.22);">
+        <div class="card-icon" style="background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.18);">🥂</div>
+        <h3 class="card-title" style="color:#D4AF37;">VIP Davetiye</h3>
+        <p class="card-desc">Sana özel bir davetim var. Aç bakalım, ne yazıyor...</p>
+        <button class="play-btn" style="background:linear-gradient(135deg,#b8860b,#D4AF37);color:#0A1628;">Aç 🎁</button>
+    </a>
+
+<a href="yakalama.html" class="card" style="border-color:rgba(255,107,138,.25);">
+    <div class="card-icon" style="background:rgba(255,107,138,.15);border-color:rgba(255,107,138,.25);">🧺</div>
+    <h3 class="card-title" style="color:#FF6B8A;">Sevgi Yakalamaca</h3>
+    <p class="card-desc">Yukarıdan düşen kalpleri sepetinle yakala. İlerledikçe senin için hazırladığım gizli notlar açılacak! 🥰</p>
+    <button class="play-btn" style="background:linear-gradient(135deg,#FF6B8A,#FF9AC3);">Kalpleri Yakala 💝</button>
+</a>
+
+<a href="pasta.html" class="card" style="border-color:rgba(245,201,87,.25);">
+    <div class="card-icon" style="background:rgba(245,201,87,.15);border-color:rgba(245,201,87,.25);">🎂</div>
+    <h3 class="card-title" style="color:var(--honey);">Dilek Pastası</h3>
+    <p class="card-desc">Senin için hazırladığım mumları söndür, kalbimden geçen asıl büyük doğum günü sürprizini keşfet! 🌌✨</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--honey), #FFB300);">Mumları Üfle 🕯️</button>
+</a>
+
+<a href="alisveris.html" class="card" style="border-color:rgba(107,184,232,.25);">
+    <div class="card-icon" style="background:rgba(107,184,232,.15);border-color:rgba(107,184,232,.25);">🛒</div>
+    <h3 class="card-title" style="color:var(--sky);">Ertuğrul'u Tasarla</h3>
+    <p class="card-desc">Sana 150 Aşk Puanı verdim. Bakalım bütçeni kullanarak beni baştan yaratabilecek misin? 🧐</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--azure), var(--sky));">Alışverişe Başla 🛍️</button>
+</a>
+
+<a href="challenge.html" class="card" style="border-color:rgba(255,107,138,.25);">
+    <div class="card-icon" style="background:rgba(255,107,138,.15);border-color:rgba(255,107,138,.25);">🃏</div>
+    <h3 class="card-title" style="color:var(--ember);">Aşk Challenge</h3>
+    <p class="card-desc">Sırayla kart çekeceğiz. Doğruluk mu, cesaret mi? Çıkan görevi yapmayan yanar baştan söyleyeyim! 😈</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--ember), #ff9eb5);">Kart Çekmeye Başla 🎲</button>
+</a>
+
+<a href="sandik.html" class="card" style="border-color:rgba(245,201,87,.25);">
+    <div class="card-icon" style="background:rgba(245,201,87,.15);border-color:rgba(245,201,87,.25);">🔒</div>
+    <h3 class="card-title" style="color:var(--honey);">Kilitli Not Sandığı</h3>
+    <p class="card-desc">İçinden geçenleri, bana söyleyemediklerini buraya kilitle. Sadece ikimizin açabileceği gizli bir anı kutusu... 📜✨</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--honey), #FFB300);">Sandığı Aç 🔑</button>
+</a>
+
+<a href="zaman-tuneli.html" class="card" style="border-color:rgba(255,107,138,.25);">
+    <div class="card-icon" style="background:rgba(255,107,138,.15);border-color:rgba(255,107,138,.25);">⏳</div>
+    <h3 class="card-title" style="color:var(--ember);">Zaman Tünelimiz</h3>
+    <p class="card-desc">Tanıştığımız o ilk mesajdan bugüne kadar geçen tüm kilometre taşlarımız. İçlerine notlarını bırakmayı unutma... 💖</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--ember), #ff9eb5);">Tüneli Gez 🚀</button>
+</a>
+
+<a href="kazi-kazan.html" class="card" style="border-color:rgba(107,184,232,.25);">
+    <div class="card-icon" style="background:rgba(107,184,232,.15);border-color:rgba(107,184,232,.25);">🎁</div>
+    <h3 class="card-title" style="color:var(--sky);">Kazı Kazan Sürprizi</h3>
+    <p class="card-desc">İyi ki doğdun prensesim! Bakalım bugün şansına hangi doğum günü hediyeleri çıkacak? 🎟️✨</p>
+    <button class="play-btn" style="background:linear-gradient(135deg, var(--sky), #4a90e2);">Hemen Kazı 🪙</button>
+</a>
+
+
+
+</div>
+
+<button class="back" onclick="location.href='index.html'">← Geri Dön</button>
+
+<script>
+(function(){
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    let W, H, st = [];
+    function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    function mk(){ return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.1+.3, a:Math.random(), da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1) }; }
+    function init(){ resize(); st = Array.from({length:80},mk); }
+    function draw(){
+        ctx.clearRect(0,0,W,H);
+        st.forEach(s=>{
+            s.a = Math.max(.05, Math.min(.9, s.a+s.da));
+            if(s.a<=.05||s.a>=.9) s.da*=-1;
+            ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    addEventListener('resize',()=>{ resize(); st=Array.from({length:80},mk); });
+    init(); draw();
+})();
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+
+
+</script>
+
+</body>
+</html>

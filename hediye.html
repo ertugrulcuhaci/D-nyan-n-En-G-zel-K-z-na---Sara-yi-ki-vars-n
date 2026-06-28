@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sana Bir Hediye 🎁</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --ink:#0A1628;--deep:#112240;--azure:#2D6FBD;--sky:#6BB8E8;--mist:#C8E8F8;--parchment:#EBF5FD;
+        --ember:#FF6B8A;--honey:#F5C957;--frost:rgba(255,255,255,.06);--rim:rgba(255,255,255,.12);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--ink);color:var(--parchment);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:hidden;position:relative;}
+
+    .photo-bg{position:fixed;inset:0;z-index:0;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;filter:blur(18px) brightness(.14) saturate(.55);transform:scale(1.12);pointer-events:none;overflow:hidden;}
+    .photo-bg img{width:190px;height:135px;object-fit:cover;flex-shrink:0;}
+    canvas#cv{position:fixed;inset:0;z-index:1;pointer-events:none;}
+
+    /* ── Sayfa başlığı ── */
+    .page-head{position:relative;z-index:2;text-align:center;margin-bottom:32px;animation:fadeUp .8s ease both;}
+    .eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,107,138,.5);margin-bottom:8px;}
+    h1{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7vw,44px);font-style:italic;font-weight:600;
+        background:linear-gradient(135deg,var(--honey),var(--ember));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;}
+    .sub{font-size:12px;font-weight:300;color:rgba(200,232,248,.45);}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ── HEDİYE KUTU ── */
+    #gift-wrap{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;}
+    .gift-scene{position:relative;width:200px;height:230px;cursor:pointer;}
+    .gift-scene:hover .g-lid{transform:translateY(-3px);}
+    .gift-hint{font-size:13px;color:rgba(200,232,248,.5);text-align:center;animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+    /* Kapak */
+    .g-lid{
+        position:absolute;top:0;left:-10px;right:-10px;height:58px;z-index:3;
+        background:linear-gradient(135deg,#FF8FA3 0%,#FF6B8A 100%);
+        border-radius:12px;
+        box-shadow:0 8px 24px rgba(255,107,138,.35),inset 0 1px 0 rgba(255,255,255,.2);
+        transform-origin:top center;
+        transition:transform 1s cubic-bezier(.175,.885,.32,1.275),opacity .8s ease;
+    }
+    /* Kapak - yatay şerit */
+    .g-lid::after{content:'';position:absolute;top:50%;left:0;width:100%;height:12px;background:rgba(245,201,87,.7);transform:translateY(-50%);border-radius:3px;}
+    /* Kapak - dikey şerit */
+    .g-lid::before{content:'';position:absolute;top:0;left:50%;width:12px;height:100%;background:rgba(245,201,87,.7);transform:translateX(-50%);border-radius:3px;}
+
+    /* Fiyonk */
+    .g-bow{position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:68px;height:52px;z-index:4;transition:opacity .4s ease;}
+    .bow-l,.bow-r{position:absolute;width:28px;height:22px;background:#F5C957;top:0;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+    .bow-l{left:4px;transform:rotate(-30deg);border-radius:50% 20% 50% 20%;}
+    .bow-r{right:4px;transform:rotate(30deg);border-radius:20% 50% 20% 50%;}
+    .bow-c{position:absolute;width:16px;height:16px;border-radius:50%;background:#F5C957;top:4px;left:50%;transform:translateX(-50%);z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+    .bow-tail-l,.bow-tail-r{position:absolute;width:12px;height:18px;background:#F5C957;bottom:-12px;}
+    .bow-tail-l{left:28px;transform:rotate(-15deg);border-radius:0 0 8px 4px;}
+    .bow-tail-r{right:28px;transform:rotate(15deg);border-radius:0 0 4px 8px;}
+
+    /* Kutu gövde */
+    .g-body{
+        position:absolute;top:58px;left:0;right:0;bottom:0;
+        background:linear-gradient(160deg,#FF6B8A 0%,#CC3558 60%,#A8294A 100%);
+        border-radius:0 0 16px 16px;
+        box-shadow:0 20px 50px rgba(255,107,138,.3),inset 0 1px 0 rgba(255,255,255,.08);
+        overflow:hidden;display:flex;align-items:center;justify-content:center;
+    }
+    .g-body::before{content:'';position:absolute;top:0;left:50%;width:12px;height:100%;background:rgba(245,201,87,.65);transform:translateX(-50%);}
+    .g-body::after{content:'';position:absolute;top:38%;left:0;width:100%;height:12px;background:rgba(245,201,87,.65);}
+    .g-inner{position:relative;z-index:2;font-size:42px;opacity:0;transform:translateY(8px);transition:opacity .5s ease .7s,transform .5s ease .7s;}
+
+    /* AÇIK durum */
+    .gift-scene.open .g-lid{transform:translateY(-90px) rotate(-15deg) scale(.9);opacity:0;}
+    .gift-scene.open .g-bow{opacity:0;}
+    .gift-scene.open .g-inner{opacity:1;transform:translateY(0);}
+    .gift-scene.open{cursor:default;}
+
+    /* ── MESAJ KARTI (açıldıktan sonra) ── */
+    #msg-card{
+        display:none;position:relative;z-index:2;
+        width:min(500px,92vw);
+        background:var(--frost);border:1px solid rgba(255,107,138,.22);
+        border-radius:24px;padding:36px 32px;text-align:center;
+        backdrop-filter:blur(22px);
+        box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 40px rgba(255,107,138,.08);
+        animation:msgReveal .7s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes msgReveal{from{opacity:0;transform:translateY(30px) scale(.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+    .msg-icon{font-size:48px;margin-bottom:16px;display:block;animation:heartbeat 2.5s ease-in-out infinite;}
+    @keyframes heartbeat{0%,100%{transform:scale(1);}14%{transform:scale(1.2);}28%{transform:scale(1);}42%{transform:scale(1.1);}56%{transform:scale(1);}}
+    .msg-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,5vw,30px);font-style:italic;font-weight:600;color:var(--mist);margin-bottom:20px;line-height:1.2;}
+    .msg-text{font-family:'Cormorant Garamond',serif;font-size:clamp(15px,3.5vw,18px);font-style:italic;font-weight:300;color:rgba(200,232,248,.88);line-height:1.85;margin-bottom:24px;}
+    .msg-text p{margin-bottom:12px;}
+    .msg-text p:last-child{margin-bottom:0;}
+    .msg-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:rgba(255,107,138,.4);}
+    .msg-divider::before,.msg-divider::after{content:'';flex:1;height:1px;background:rgba(255,107,138,.2);}
+    .msg-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    .m-btn{padding:11px 24px;border:none;border-radius:26px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:#fff;transition:.2s;}
+    .m-btn.rose{background:linear-gradient(135deg,var(--ember),var(--honey));box-shadow:0 6px 18px rgba(255,107,138,.35);}
+    .m-btn.ghost{background:transparent;border:1.5px solid rgba(107,184,232,.38);color:var(--sky);}
+    .m-btn:hover{transform:scale(1.05);}
+    .m-btn.ghost:hover{background:var(--sky);color:var(--ink);}
+
+    /* Yağan parçacıklar */
+    .piece{position:fixed;top:-20px;border-radius:2px;z-index:50;pointer-events:none;animation:pfall linear forwards;}
+    @keyframes pfall{0%{transform:translateY(0) rotate(0);}100%{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+    .fheart{position:fixed;pointer-events:none;z-index:50;animation:ffall linear forwards;}
+    @keyframes ffall{to{transform:translateY(110vh);opacity:0;}}
+
+    .back-btn{position:relative;z-index:2;margin-top:14px;padding:9px 22px;border:1.5px solid rgba(107,184,232,.38);background:transparent;color:var(--sky);border-radius:24px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.22s;}
+    .back-btn:hover{background:var(--sky);color:var(--ink);}
+    @media(prefers-reduced-motion:reduce){.gift-scene.open .g-lid,.g-inner,.msg-icon{animation:none;transition:none;}}
+</style>
+</head>
+<body>
+
+<div class="photo-bg" aria-hidden="true">
+    <img src="hafiza1.jpg"><img src="hafiza2.jpg"><img src="hafiza3.jpg"><img src="hafiza4.jpg">
+    <img src="masal1.jpg"><img src="masal2.jpg"><img src="masal3.jpg"><img src="masal4.jpg">
+    <img src="hafiza5.jpg"><img src="masal5.jpg"><img src="hafiza1.jpg"><img src="masal2.jpg">
+</div>
+<canvas id="cv"></canvas>
+
+<!-- Kutu fazı -->
+<div id="gift-wrap">
+    <div class="page-head">
+        <p class="eyebrow">Sadece sana</p>
+        <h1>Sana Bir Hediye 🎁</h1>
+        <p class="sub">Aç bakalım, ne var içinde...</p>
+    </div>
+
+    <div class="gift-scene" id="giftScene" onclick="openGift()">
+        <!-- Fiyonk -->
+        <div class="g-bow">
+            <div class="bow-l"></div>
+            <div class="bow-r"></div>
+            <div class="bow-c"></div>
+            <div class="bow-tail-l"></div>
+            <div class="bow-tail-r"></div>
+        </div>
+        <!-- Kapak -->
+        <div class="g-lid"></div>
+        <!-- Gövde -->
+        <div class="g-body">
+            <div class="g-inner">💙</div>
+        </div>
+    </div>
+
+    <p class="gift-hint" id="giftHint">👆 Kutunun üstüne dokun</p>
+    <button class="back-btn" style="margin-top:8px;" onclick="location.href='dogumgunu.html'">← Geri</button>
+</div>
+
+<!-- Mesaj fazı (gizli) -->
+<div id="msg-card">
+    <span class="msg-icon">💌</span>
+    <h2 class="msg-title">Sana gerçek bir hediyem var...</h2>
+    <div class="msg-text">
+        <p>Bu dünyada seni tanıdığım için kendimi en şanslı insan sayıyorum.</p>
+        <div class="msg-divider">❤️</div>
+        <p>Gülüşün hediyem, varlığın hediyem, seninle geçen her an hediyem. Bunları hiçbir kutuya sığdıramam — ama bilmeni istedim.</p>
+        <div class="msg-divider">💙</div>
+        <p>Sen benim en güzel sürprizimsin. Seni çok seviyorum, Emine Sara'm. 🌟</p>
+    </div>
+    <div class="msg-btns">
+        <button class="m-btn rose" onclick="moreConfetti()">🎉 Bir Kez Daha!</button>
+        <button class="m-btn ghost" onclick="location.href='dogumgunu.html'">← Geri Dön</button>
+    </div>
+</div>
+
+<script>
+/* Canvas */
+(function(){
+    const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+    let W,H,st=[];
+    const resize=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;};
+    const mk=()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.3,a:Math.random(),da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1)});
+    function draw(){ctx.clearRect(0,0,W,H);st.forEach(s=>{s.a=Math.max(.04,Math.min(.88,s.a+s.da));if(s.a<=.04||s.a>=.88)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();});requestAnimationFrame(draw);}
+    addEventListener('resize',()=>{resize();st=Array.from({length:80},mk);});
+    resize();st=Array.from({length:80},mk);draw();
+})();
+
+let opened=false;
+function openGift(){
+    if(opened)return;
+    opened=true;
+    const scene=document.getElementById('giftScene');
+    scene.classList.add('open');
+    document.getElementById('giftHint').style.opacity='0';
+
+    // Parça patlaması
+    setTimeout(()=>{
+        burst();
+        // 1.5s sonra mesaj kartını göster
+        setTimeout(()=>{
+            document.getElementById('gift-wrap').style.display='none';
+            document.getElementById('msg-card').style.display='block';
+        },1500);
+    },600);
+}
+
+const COLS=['#FF6B8A','#F5C957','#6BB8E8','#fff','#FF9AC3','#FFE066','#2D6FBD'];
+const HEARTS=['❤️','💙','✨','⭐','💫','🌟','💕','🎊'];
+
+function burst(){
+    // Konfeti
+    for(let i=0;i<80;i++){
+        const el=document.createElement('div');
+        el.className='piece';
+        el.style.left=Math.random()*100+'vw';
+        el.style.background=COLS[Math.floor(Math.random()*COLS.length)];
+        const s=Math.random()*8+6;el.style.width=s+'px';el.style.height=s+'px';
+        el.style.borderRadius=Math.random()>.5?'50%':'2px';
+        const dur=(Math.random()*2.5+2).toFixed(2);
+        el.style.animationDuration=dur+'s';
+        el.style.animationDelay=(Math.random()*1).toFixed(2)+'s';
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),(parseFloat(dur)+2)*1000);
+    }
+    // Kalpler / semboller
+    for(let i=0;i<25;i++){
+        const el=document.createElement('div');
+        el.className='fheart';
+        el.textContent=HEARTS[Math.floor(Math.random()*HEARTS.length)];
+        el.style.left=Math.random()*100+'vw';
+        el.style.top='-30px';
+        el.style.fontSize=(Math.random()*12+10)+'px';
+        const dur=(Math.random()*3+3).toFixed(2);
+        el.style.animationDuration=dur+'s';
+        el.style.animationDelay=(Math.random()*1.5).toFixed(2)+'s';
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),(parseFloat(dur)+2.5)*1000);
+    }
+}
+
+function moreConfetti(){burst();}
+</script>
+
+<!-- 💖 MOUSE EFEKTİ STİLLERİ 💖 -->
+<style>
+    /* 1. Fare İmlecini Kalp Yapma */
+    body {
+        /* İmleci pembe bir kalp SVG'si ile değiştirir (12 12 imlecin merkez noktasıdır) */
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23FF6B8A' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, auto;
+    }
+
+    /* Butonlar ve linkler üzerine gelindiğinde de imleç kalp kalsın ama parlasın */
+    a, button, .flipper, canvas, input, textarea {
+        cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='%23F5C957' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>") 12 12, pointer !important;
+    }
+
+    /* 2. Uçuşan Kalplerin Tasarımı */
+    .magic-heart {
+        position: fixed;
+        pointer-events: none; /* Kalplerin tıklamayı engellememesi için çok önemli */
+        z-index: 9999;
+        font-size: 16px;
+        animation: floatAndFade 1s ease-out forwards;
+        transform: translate(-50%, -50%); /* Tam farenin ucundan çıkması için */
+    }
+
+    /* Kalplerin yukarı doğru uçup kaybolma animasyonu */
+    @keyframes floatAndFade {
+        0% { 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(-50%, -150px) scale(1.5); 
+            opacity: 0; 
+        }
+    }
+</style>
+
+<!-- 💖 MOUSE EFEKTİ JAVASCRIPT'İ 💖 -->
+<script>
+(function() {
+    // Ekranda çıkacak kalp çeşitleri (istediğin emojiyi ekleyebilirsin)
+    const hearts = ["💖", "✨", "💕", "🌸", "💘"];
+    
+    // Farenin her hareketini dinle
+    document.addEventListener('mousemove', function(e) {
+        // Çok fazla kalp çıkıp ekranı dondurmasın diye %80 ihtimalle boş geçiyoruz
+        if (Math.random() > 0.15) return;
+
+        // Yeni bir kalp elementi oluştur
+        const heartEl = document.createElement('div');
+        heartEl.className = 'magic-heart';
+        
+        // Rastgele bir kalp emojisi seç
+        heartEl.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        
+        // Kalbin çıkacağı konumu farenin konumuna ayarla
+        heartEl.style.left = e.clientX + 'px';
+        heartEl.style.top = e.clientY + 'px';
+        
+        // Biraz rastgelelik katalım (hafif sağa veya sola doğru uçsunlar)
+        const randomX = (Math.random() - 0.5) * 50; 
+        heartEl.style.setProperty('--tx', `${randomX}px`);
+
+        // Elementi sayfaya ekle
+        document.body.appendChild(heartEl);
+        
+        // Animasyon bitince (1 saniye sonra) elementi DOM'dan sil (kasmasını engeller)
+        setTimeout(() => {
+            heartEl.remove();
+        }, 1000);
+    });
+})();
+</script>
+
+</body>
+</html>
